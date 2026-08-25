@@ -10,7 +10,7 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == uid;
     }
     function isGlobalAdmin() {
-      return isSignedIn() && request.auth.token.email == 'keny.alkan@gmail.com';
+      return isSignedIn() && request.auth.token.email == 'contact.corvio@icloud.com';
     }
     function projectMembers(projectId) {
       return get(/databases/$(database)/documents/projects/$(projectId)).data.members;

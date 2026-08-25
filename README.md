@@ -124,7 +124,7 @@ Puis sur Netlify : Import existing project → Deploy.
 ## Structure
 
 ```
-todolist/
+corvio-space/
 ├── index.html      # Interface complète
 ├── styles.css      # 1500+ lignes CSS premium
 ├── app.js          # 1000+ lignes JS (Auth + Collab)

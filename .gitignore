@@ -20,3 +20,5 @@ memory/
 
 # Local Netlify folder
 .netlify
+
+.vercel

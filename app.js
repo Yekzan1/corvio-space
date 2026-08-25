@@ -1,17 +1,23 @@
 // ==========================================
-// CORVIO SPACE - Ultimate Task Management
-// Version 3.0 - Full Featured
+// CORVIO SPACE - Base de Données & Cloud
 // ==========================================
-
-const firebaseConfig = {
-    apiKey: "AIzaSyC0Z5kEg2q1MkEYtarcmko7JCDIO-LK8E0",
-    authDomain: "todolist-ed2f3.firebaseapp.com",
-    projectId: "todolist-ed2f3",
-    storageBucket: "todolist-ed2f3.firebasestorage.app",
-    messagingSenderId: "881199179720",
-    appId: "1:881199179720:web:2f1d9de104ca6ed3f1c2fd",
-    measurementId: "G-ZP8QVWRBMW"
+const getFirebaseConfig = () => {
+    try {
+        const stored = localStorage.getItem('corviospace_custom_firebase');
+        if (stored) return JSON.parse(stored);
+    } catch (e) {}
+    return {
+        apiKey: "AIzaSyC0Z5kEg2q1MkEYtarcmko7JCDIO-LK8E0",
+        authDomain: "corvio-space-prod.firebaseapp.com",
+        projectId: "corvio-space-prod",
+        storageBucket: "corvio-space-prod.firebasestorage.app",
+        messagingSenderId: "881199179720",
+        appId: "1:881199179720:web:corviospaceprod",
+        measurementId: "G-CORVIOSPACE"
+    };
 };
+
+const firebaseConfig = getFirebaseConfig();
 
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
@@ -3366,10 +3372,10 @@ $$('.sidebar-view-btn').forEach(btn => {
 
 // ---- Deploy button: trigger a Netlify build hook ----
 // Default hook rebuilds production (corviospace-space). Overridable per device
-// via localStorage('taskflow_build_hook').
+// via localStorage('corviospace_build_hook').
 $('deploy-btn')?.addEventListener('click', async () => {
     const DEFAULT_HOOK = 'https://api.netlify.com/build_hooks/6a3e7435132d1f0e46f1b20e';
-    const url = localStorage.getItem('taskflow_build_hook') || DEFAULT_HOOK;
+    const url = localStorage.getItem('corviospace_build_hook') || DEFAULT_HOOK;
 
     if (!confirm('Lancer un deploiement en production sur Netlify ?')) return;
     try {
@@ -3412,10 +3418,10 @@ function openMobilePromo() {
 
 // Auto-show once on desktop for logged-in users (until dismissed).
 function maybeShowMobilePromo() {
-    if (localStorage.getItem('taskflow_promo_dismissed')) return;
-    if (localStorage.getItem('taskflow_promo_seen')) return;
+    if (localStorage.getItem('corviospace_promo_dismissed')) return;
+    if (localStorage.getItem('corviospace_promo_seen')) return;
     if (window.matchMedia('(max-width: 900px)').matches) return; // desktop only
-    localStorage.setItem('taskflow_promo_seen', '1');
+    localStorage.setItem('corviospace_promo_seen', '1');
     setTimeout(openMobilePromo, 1200);
 }
 
@@ -3442,7 +3448,7 @@ $('promo-install')?.addEventListener('click', async () => {
 });
 
 $('promo-dismiss')?.addEventListener('click', () => {
-    localStorage.setItem('taskflow_promo_dismissed', '1');
+    localStorage.setItem('corviospace_promo_dismissed', '1');
     closeModal($('mobile-promo-modal'));
 });
 
@@ -6038,7 +6044,7 @@ function exportICS() {
         const due = new Date(t.dueDate);
         const end = new Date(due.getTime() + 60 * 60 * 1000); // +1h
         lines.push('BEGIN:VEVENT');
-        lines.push(`UID:${t.id}@taskflow`);
+        lines.push(`UID:${t.id}@corvio-space`);
         lines.push(`DTSTAMP:${fmt(new Date())}`);
         lines.push(`DTSTART:${fmt(due)}`);
         lines.push(`DTEND:${fmt(end)}`);
