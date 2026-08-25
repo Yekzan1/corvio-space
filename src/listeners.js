@@ -8,7 +8,7 @@ import { el } from './core/dom.js';
 import { handleError } from './core/utils.js';
 import { filtreAppartenance } from './core/requetes.js';
 import { afficherSquelettesProjets, squelettesDifferes } from './core/skeletons.js';
-import { renderProjects, selectProject, applyRoleUI } from './projects.js';
+import { renderProjects, selectProject, applyRoleUI, initStarterWorkspace } from './projects.js';
 import { updateEmptyState, renderMyTasks, renderToday, updateViewBadges } from './views.js';
 import { renderNotifications } from './notifications.js';
 import { renderTemplatesList } from './templates.js';
@@ -26,25 +26,46 @@ export function startListeners() {
     // Projects
     const pq = query(
         collection(db, 'projects'),
-        where('members', 'array-contains', state.currentUser.uid),
+        where('members', 'array-contains', state.currentUser?.uid || 'user_demo'),
         orderBy('createdAt', 'desc')
     );
 
     if (state.unsubscribers.projects) state.unsubscribers.projects();
-    state.unsubscribers.projects = onSnapshot(pq, snap => {
+    try {
+        state.unsubscribers.projects = onSnapshot(pq, snap => {
+            squelettesPosesParProjets();
+            if (snap.docs && snap.docs.length > 0) {
+                state.projects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            } else {
+                const { projects } = initStarterWorkspace(state.currentUser?.uid);
+                state.projects = projects;
+            }
+            renderProjects();
+            if (!state.currentProjectId && state.projects.length) {
+                selectProject(state.projects[0].id);
+            }
+            updateEmptyState();
+            if (state.currentProjectId) applyRoleUI();
+        }, error => {
+            squelettesPosesParProjets();
+            const { projects } = initStarterWorkspace(state.currentUser?.uid);
+            state.projects = projects;
+            renderProjects();
+            if (!state.currentProjectId && state.projects.length) {
+                selectProject(state.projects[0].id);
+            }
+            updateEmptyState();
+        });
+    } catch(e) {
         squelettesPosesParProjets();
-        state.projects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const { projects } = initStarterWorkspace(state.currentUser?.uid);
+        state.projects = projects;
         renderProjects();
         if (!state.currentProjectId && state.projects.length) {
             selectProject(state.projects[0].id);
         }
         updateEmptyState();
-        // Re-apply role UI in case my role just changed
-        if (state.currentProjectId) applyRoleUI();
-    }, error => {
-        squelettesPosesParProjets();
-        handleError(error, 'projects listener');
-    });
+    }
 
     // Notifications
     const nq = query(

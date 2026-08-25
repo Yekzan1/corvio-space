@@ -22,9 +22,89 @@ import { closeMobileSidebar } from './mobile.js';
 import { createTasksFromTemplate } from './templates.js';
 import { rafraichirPlateauMobile } from './plateauMobile.js';
 
-// ==========================================
-// RENDER + SELECT
-// ==========================================
+export function initStarterWorkspace(userId) {
+    try {
+        let existingProjects = JSON.parse(localStorage.getItem('corviospace_projects') || '[]');
+        let existingTasks = JSON.parse(localStorage.getItem('corviospace_tasks') || '[]');
+        
+        let projectId;
+        if (existingProjects.length === 0) {
+            projectId = 'proj_' + Math.random().toString(36).slice(2, 9);
+            const starterProject = {
+                id: projectId,
+                name: "Chantiers & Projets 2026",
+                description: "Suivi en temps réel des commandes, chantiers et facturations",
+                color: "#10b981",
+                ownerId: userId || state.currentUser?.uid || 'user_owner',
+                members: [userId || state.currentUser?.uid || 'user_owner'],
+                createdAt: new Date().toISOString()
+            };
+            existingProjects = [starterProject];
+            localStorage.setItem('corviospace_projects', JSON.stringify(existingProjects));
+        } else {
+            projectId = existingProjects[0].id;
+        }
+
+        if (existingTasks.length === 0) {
+            const starterTasks = [
+                {
+                    id: 'task_1',
+                    projectId: projectId,
+                    title: "Rénovation toiture & zinguerie",
+                    description: "Chantier M. Delorme à Arnas. Dépose tuiles et pose étanchéité zinc.",
+                    status: "todo",
+                    priority: "high",
+                    assigneeId: userId || state.currentUser?.uid,
+                    dueDate: new Date(Date.now() + 86400000).toISOString(),
+                    createdAt: new Date().toISOString(),
+                    tags: ["Toiture", "Urgent"]
+                },
+                {
+                    id: 'task_2',
+                    projectId: projectId,
+                    title: "Pose carrelage & plomberie",
+                    description: "Boulangerie des Halles. Raccordement eau et faïence murale.",
+                    status: "inprogress",
+                    priority: "medium",
+                    assigneeId: userId || state.currentUser?.uid,
+                    dueDate: new Date(Date.now() + 3 * 86400000).toISOString(),
+                    createdAt: new Date().toISOString(),
+                    tags: ["Carrelage", "Plomberie"]
+                },
+                {
+                    id: 'task_3',
+                    projectId: projectId,
+                    title: "Ravalement façade pierre dorée",
+                    description: "Domaine des Vignes à Anse. Nettoyage basse pression et rejointoiement à la chaux.",
+                    status: "review",
+                    priority: "low",
+                    assigneeId: userId || state.currentUser?.uid,
+                    dueDate: new Date(Date.now() - 86400000).toISOString(),
+                    createdAt: new Date().toISOString(),
+                    tags: ["Façade", "Patrimoine"]
+                },
+                {
+                    id: 'task_4',
+                    projectId: projectId,
+                    title: "Électricité générale showroom",
+                    description: "Garage Automobile. Tableau triphasé et éclairage LED basse consommation.",
+                    status: "done",
+                    priority: "medium",
+                    assigneeId: userId || state.currentUser?.uid,
+                    completedAt: new Date().toISOString(),
+                    createdAt: new Date().toISOString(),
+                    tags: ["Électricité", "Facturé"]
+                }
+            ];
+            existingTasks = starterTasks;
+            localStorage.setItem('corviospace_tasks', JSON.stringify(existingTasks));
+        }
+
+        return { projects: existingProjects, tasks: existingTasks };
+    } catch(e) {
+        return { projects: [], tasks: [] };
+    }
+}
 
 export function renderProjects() {
     if (!el.projectsList) return;

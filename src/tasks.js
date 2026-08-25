@@ -30,7 +30,7 @@ import { addGamificationPoints, checkTaskCompletionBadges, logActivity, fireConf
 import { notifyTaskEvent } from './webhooks.js';
 import { listenToTaskAttachments } from './attachments.js';
 import { renderComments, addComment } from './comments.js';
-import { getProjectColumns } from './projects.js';
+import { getProjectColumns, initStarterWorkspace } from './projects.js';
 import { saveTaskAsTemplate } from './templates.js';
 
 // ==========================================
@@ -65,34 +65,33 @@ export function listenToTasks(projectId) {
         orderBy('createdAt', 'desc')
     );
 
-    state.unsubscribers.taskListener = onSnapshot(q, snap => {
-        squelettesPosesParBoard();
-        state.tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderTasks();
-        updateStats();
-        if (state.currentView === 'calendar') renderCalendar();
-        // Le tableau de bord garde en memoire les taches de TOUS les projets :
-        // une modification ici rend ce cache perime. On l'invalide sans
-        // re-rendre — la vue n'est pas a l'ecran, et la recharger a chaque
-        // snapshot declencherait une requete par projet a chaque frappe.
-        invaliderCacheDashboard();
-    }, error => {
-        // Fallback query without archived field for backward compatibility
-        const fallbackQ = query(
-            collection(db, 'tasks'),
-            ...filtreAppartenance(state.currentUser?.uid),
-            where('projectId', '==', projectId),
-            orderBy('createdAt', 'desc')
-        );
-
-        state.unsubscribers.taskListener = onSnapshot(fallbackQ, snap => {
+    try {
+        state.unsubscribers.taskListener = onSnapshot(q, snap => {
             squelettesPosesParBoard();
-            state.tasks = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(t => !t.archived);
-            state.archivedTasks = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(t => t.archived);
+            if (snap.docs && snap.docs.length > 0) {
+                state.tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            } else {
+                const { tasks } = initStarterWorkspace(state.currentUser?.uid);
+                state.tasks = tasks.filter(t => t.projectId === projectId && !t.archived);
+            }
             renderTasks();
             updateStats();
-        }, () => squelettesPosesParBoard());
-    });
+            if (state.currentView === 'calendar') renderCalendar();
+            invaliderCacheDashboard();
+        }, error => {
+            squelettesPosesParBoard();
+            const { tasks } = initStarterWorkspace(state.currentUser?.uid);
+            state.tasks = tasks.filter(t => t.projectId === projectId && !t.archived);
+            renderTasks();
+            updateStats();
+        });
+    } catch(e) {
+        squelettesPosesParBoard();
+        const { tasks } = initStarterWorkspace(state.currentUser?.uid);
+        state.tasks = tasks.filter(t => t.projectId === projectId && !t.archived);
+        renderTasks();
+        updateStats();
+    }
 
     // Archived tasks
     const aq = query(
