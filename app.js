@@ -670,17 +670,6 @@ el.registerForm?.addEventListener('submit', async e => {
         loadLocalStorageFallback();
         initializeTheme();
         checkReminders();
-    } finally {
-        btn.disabled = false;
-        btn.textContent = 'Creer mon compte';
-    }
-});
-        await ensureUserProfile({ ...user, displayName: name });
-    } catch (err) {
-        showAuthError(errorMessages[err.code] || errorMessages.default);
-    } finally {
-        btn.disabled = false;
-        btn.textContent = 'Creer mon compte';
     }
 });
 
