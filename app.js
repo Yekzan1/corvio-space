@@ -54,83 +54,86 @@ function trialDaysLeft() {
 function initStarterWorkspace(userId) {
     try {
         let existingProjects = JSON.parse(localStorage.getItem('corviospace_projects') || '[]');
-        if (existingProjects.length > 0) return existingProjects;
+        let existingTasks = JSON.parse(localStorage.getItem('corviospace_tasks') || '[]');
+        
+        let projectId;
+        if (existingProjects.length === 0) {
+            projectId = 'proj_' + Math.random().toString(36).slice(2, 9);
+            const starterProject = {
+                id: projectId,
+                name: "Chantiers & Projets 2026",
+                description: "Suivi en temps réel des commandes, chantiers et facturations",
+                color: "#10b981",
+                ownerId: userId || 'user_demo',
+                members: [userId || 'user_demo'],
+                createdAt: new Date().toISOString()
+            };
+            existingProjects = [starterProject];
+            localStorage.setItem('corviospace_projects', JSON.stringify(existingProjects));
+        } else {
+            projectId = existingProjects[0].id;
+        }
 
-        const projectId = 'proj_' + Math.random().toString(36).slice(2, 9);
-        const starterProject = {
-            id: projectId,
-            name: "Chantiers & Projets 2026",
-            description: "Suivi en temps réel des commandes, chantiers et facturations",
-            color: "#10b981",
-            ownerId: userId || 'user_demo',
-            members: [userId || 'user_demo'],
-            createdAt: new Date().toISOString(),
-            columns: [
-                { id: "todo", name: "1. Demandes & Devis", color: "#f59e0b" },
-                { id: "inprogress", name: "2. Chantiers en cours", color: "#3b82f6" },
-                { id: "review", name: "3. En validation / Finitions", color: "#8b5cf6" },
-                { id: "done", name: "4. Livré & Facturé", color: "#10b981" }
-            ]
-        };
+        if (existingTasks.length === 0) {
+            const starterTasks = [
+                {
+                    id: 'task_1',
+                    projectId: projectId,
+                    title: "Rénovation toiture & zinguerie",
+                    description: "Chantier M. Delorme à Arnas. Dépose tuiles et pose étanchéité zinc.",
+                    status: "todo",
+                    column: "todo",
+                    priority: "high",
+                    assigneeId: userId || 'user_demo',
+                    dueDate: new Date(Date.now() + 86400000).toISOString(),
+                    createdAt: new Date().toISOString(),
+                    tags: ["Toiture", "Urgent"]
+                },
+                {
+                    id: 'task_2',
+                    projectId: projectId,
+                    title: "Pose carrelage & plomberie",
+                    description: "Boulangerie des Halles. Raccordement eau et faïence murale.",
+                    status: "inprogress",
+                    column: "inprogress",
+                    priority: "medium",
+                    assigneeId: userId || 'user_demo',
+                    dueDate: new Date(Date.now() + 3 * 86400000).toISOString(),
+                    createdAt: new Date().toISOString(),
+                    tags: ["Carrelage", "Plomberie"]
+                },
+                {
+                    id: 'task_3',
+                    projectId: projectId,
+                    title: "Ravalement façade pierre dorée",
+                    description: "Domaine des Vignes à Anse. Nettoyage basse pression et rejointoiement à la chaux.",
+                    status: "review",
+                    column: "review",
+                    priority: "low",
+                    assigneeId: userId || 'user_demo',
+                    dueDate: new Date(Date.now() - 86400000).toISOString(),
+                    createdAt: new Date().toISOString(),
+                    tags: ["Façade", "Patrimoine"]
+                },
+                {
+                    id: 'task_4',
+                    projectId: projectId,
+                    title: "Électricité générale showroom",
+                    description: "Garage Automobile. Tableau triphasé et éclairage LED basse consommation.",
+                    status: "done",
+                    column: "done",
+                    priority: "medium",
+                    assigneeId: userId || 'user_demo',
+                    completedAt: new Date().toISOString(),
+                    createdAt: new Date().toISOString(),
+                    tags: ["Électricité", "Facturé"]
+                }
+            ];
+            existingTasks = starterTasks;
+            localStorage.setItem('corviospace_tasks', JSON.stringify(existingTasks));
+        }
 
-        const starterTasks = [
-            {
-                id: 'task_1',
-                projectId: projectId,
-                title: "Rénovation toiture & zinguerie",
-                description: "Chantier M. Delorme à Arnas. Dépose tuiles et pose étanchéité zinc.",
-                status: "todo",
-                column: "todo",
-                priority: "high",
-                assigneeId: userId || 'user_demo',
-                dueDate: new Date(Date.now() + 86400000).toISOString(),
-                createdAt: new Date().toISOString(),
-                tags: ["Toiture", "Urgent"]
-            },
-            {
-                id: 'task_2',
-                projectId: projectId,
-                title: "Pose carrelage & plomberie",
-                description: "Boulangerie des Halles. Raccordement eau et faïence murale.",
-                status: "inprogress",
-                column: "inprogress",
-                priority: "medium",
-                assigneeId: userId || 'user_demo',
-                dueDate: new Date(Date.now() + 3 * 86400000).toISOString(),
-                createdAt: new Date().toISOString(),
-                tags: ["Carrelage", "Plomberie"]
-            },
-            {
-                id: 'task_3',
-                projectId: projectId,
-                title: "Ravalement façade pierre dorée",
-                description: "Domaine des Vignes à Anse. Nettoyage basse pression et rejointoiement à la chaux.",
-                status: "review",
-                column: "review",
-                priority: "low",
-                assigneeId: userId || 'user_demo',
-                dueDate: new Date(Date.now() - 86400000).toISOString(),
-                createdAt: new Date().toISOString(),
-                tags: ["Façade", "Patrimoine"]
-            },
-            {
-                id: 'task_4',
-                projectId: projectId,
-                title: "Électricité générale showroom",
-                description: "Garage Automobile. Tableau triphasé et éclairage LED basse consommation.",
-                status: "done",
-                column: "done",
-                priority: "medium",
-                assigneeId: userId || 'user_demo',
-                completedAt: new Date().toISOString(),
-                createdAt: new Date().toISOString(),
-                tags: ["Électricité", "Facturé"]
-            }
-        ];
-
-        localStorage.setItem('corviospace_projects', JSON.stringify([starterProject]));
-        localStorage.setItem('corviospace_tasks', JSON.stringify(starterTasks));
-        return [starterProject];
+        return existingProjects;
     } catch(e) {
         return [];
     }
@@ -942,6 +945,7 @@ async function selectProject(id) {
         await safeAsync(() => loadMembers(p), 'loadMembers');
         listenToTasks(id);
         listenToTags(id);
+        loadLocalTasksFallback(id);
         // v5: presence + custom columns + project background
         listenToPresence(id);
         updatePresence(id);
