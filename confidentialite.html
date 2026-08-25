@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<!--
+    POLITIQUE DE CONFIDENTIALITE
+
+    Le contenu technique de cette page a ete etabli en relisant le code :
+    champs reellement ecrits dans Firestore (src/auth.js), cles localStorage
+    reellement posees, appels reseau sortants reellement effectues. Il decrit
+    donc ce que l'application fait, pas ce qu'on suppose qu'elle fait.
+
+    SEULE EXCEPTION : la denomination du responsable du traitement, au
+    point 1. Elle renvoie a l'identite juridique de l'editeur, qui ne peut
+    etre ni deduite du depot ni inventee. Elle est a remplir en meme temps
+    que l'encadre des mentions legales.
+-->
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Politique de confidentialité — Corvio Space</title>
+    <meta name="description" content="Comment Corvio Space collecte, utilise et protège vos données personnelles.">
+    <meta name="robots" content="index, follow">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="legal-body">
+    <a href="#legal-contenu" class="skip-link">Aller au contenu</a>
+
+    <header class="legal-header">
+        <a href="/" class="legal-logo">
+            <span class="legal-logo-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+            </span>
+            <span class="legal-logo-text">Corvio Space</span>
+        </a>
+        <a href="/" class="legal-retour">Retour à l'application</a>
+    </header>
+
+    <main class="legal-main" id="legal-contenu">
+        <p class="legal-surtitre">Vie privée</p>
+        <h1>Politique de confidentialité</h1>
+        <p class="legal-date">Dernière mise à jour : 22 juillet 2026</p>
+
+        <p class="legal-chapeau">
+            Corvio Space est un outil de gestion de projet collaboratif. Pour fonctionner, il doit
+            conserver votre compte et le contenu que vous y créez. Cette page dit exactement
+            quelles données sont enregistrées, où elles vont, combien de temps elles restent,
+            et comment les récupérer ou les effacer.
+        </p>
+
+        <nav class="legal-sommaire" aria-label="Sommaire">
+            <ol>
+                <li><a href="#responsable">Qui est responsable</a></li>
+                <li><a href="#donnees">Quelles données sont collectées</a></li>
+                <li><a href="#finalites">Pourquoi, et sur quelle base légale</a></li>
+                <li><a href="#destinataires">Qui d'autre y a accès</a></li>
+                <li><a href="#duree">Combien de temps elles sont conservées</a></li>
+                <li><a href="#droits">Vos droits</a></li>
+                <li><a href="#securite">Sécurité</a></li>
+                <li><a href="#cookies">Cookies et stockage local</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ol>
+        </nav>
+
+        <section id="responsable">
+            <h2>1. Qui est responsable du traitement</h2>
+            <p>
+                Le responsable du traitement est l'éditeur de Corvio Space, dont l'identité
+                complète et les coordonnées figurent dans les
+                <a href='/mentions-legales'>mentions légales</a>.
+                Pour toute question relative à vos données, écrivez à
+                <a href="mailto:devkentoolsco@gmail.com">devkentoolsco@gmail.com</a>.
+            </p>
+        </section>
+
+        <section id="donnees">
+            <h2>2. Quelles données sont collectées</h2>
+
+            <h3>Votre compte</h3>
+            <ul>
+                <li><strong>Adresse e-mail</strong> — sert d'identifiant de connexion et permet de vous inviter sur un projet.</li>
+                <li><strong>Pseudo</strong> et <strong>identifiant public</strong> (de la forme <code>pseudo#1234</code>) — visibles par les autres membres de vos projets.</li>
+                <li><strong>Mot de passe</strong> — géré par Firebase Authentication (Google). Il n'est jamais transmis à Corvio Space ni stocké en clair : seule une empreinte chiffrée est conservée par Firebase.</li>
+                <li><strong>Date de création du compte</strong>, <strong>statut de licence</strong> et <strong>date de fin de la période d'essai</strong> (7 jours).</li>
+                <li><strong>Préférences</strong> : notifications, sons, mode compact, thème.</li>
+            </ul>
+
+            <h3>Ce que vous créez dans l'application</h3>
+            <ul>
+                <li>Projets : nom, description, couleur, colonnes personnalisées, liste des membres et leurs rôles.</li>
+                <li>Tâches : titre, description, priorité, échéance, sous-tâches, étiquettes, temps passé, personne assignée.</li>
+                <li>Commentaires et mentions.</li>
+                <li><strong>Pièces jointes</strong> : les fichiers que vous joignez à une tâche sont stockés dans la base de données, encodés en base64. Ne joignez pas de document que vous ne voudriez pas voir conservé.</li>
+                <li>Journal d'activité du projet (qui a fait quoi, et quand).</li>
+                <li>Notifications qui vous sont adressées.</li>
+                <li>Présence : le projet que vous consultez en ce moment, pour afficher votre avatar aux autres membres du même projet.</li>
+                <li>Points, badges et série de jours consécutifs (gamification).</li>
+            </ul>
+
+            <h3>Ce qui n'est pas collecté</h3>
+            <p>
+                Corvio Space n'utilise ni traceur publicitaire, ni cookie de mesure d'audience tiers,
+                ni profilage. Aucune donnée n'est vendue ni cédée à des fins commerciales.
+                Aucune donnée de géolocalisation, de caméra ou de micro n'est demandée — ces
+                permissions sont d'ailleurs explicitement bloquées par l'en-tête
+                <code>Permissions-Policy</code> du site.
+            </p>
+        </section>
+
+        <section id="finalites">
+            <h2>3. Pourquoi, et sur quelle base légale</h2>
+            <table class="legal-table">
+                <thead>
+                    <tr><th>Finalité</th><th>Base légale (RGPD)</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Fournir le service : compte, projets, tâches, collaboration</td>
+                        <td>Exécution du contrat (art. 6.1.b)</td>
+                    </tr>
+                    <tr>
+                        <td>Gérer la période d'essai et les licences</td>
+                        <td>Exécution du contrat (art. 6.1.b)</td>
+                    </tr>
+                    <tr>
+                        <td>Sécurité, prévention des abus, journalisation technique</td>
+                        <td>Intérêt légitime (art. 6.1.f)</td>
+                    </tr>
+                    <tr>
+                        <td>Intégrations facultatives (webhook, Telegram) et partage public d'un projet</td>
+                        <td>Consentement (art. 6.1.a) — activés uniquement si vous les configurez</td>
+                    </tr>
+                    <tr>
+                        <td>Obligations comptables et fiscales liées aux licences</td>
+                        <td>Obligation légale (art. 6.1.c)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="destinataires">
+            <h2>4. Qui d'autre y a accès</h2>
+
+            <h3>Les autres utilisateurs</h3>
+            <p>
+                Les membres d'un projet voient son contenu, ainsi que le pseudo, l'identifiant
+                public et l'e-mail des autres membres. Si vous activez le <strong>partage public</strong>
+                d'un projet, son contenu devient accessible à toute personne disposant du lien,
+                sans connexion. Ce partage se désactive depuis le projet.
+            </p>
+
+            <h3>Sous-traitants</h3>
+            <table class="legal-table">
+                <thead>
+                    <tr><th>Prestataire</th><th>Rôle</th><th>Ce qu'il reçoit</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Google (Firebase Authentication, Cloud Firestore)</td>
+                        <td>Authentification et base de données</td>
+                        <td>L'intégralité des données décrites au point 2</td>
+                    </tr>
+                    <tr>
+                        <td>Netlify</td>
+                        <td>Hébergement du site</td>
+                        <td>Journaux techniques de connexion (adresse IP, navigateur)</td>
+                    </tr>
+                    <tr>
+                        <td>api.qrserver.com</td>
+                        <td>Génération du QR code d'installation mobile</td>
+                        <td>Uniquement l'adresse du site. Appelé seulement si la fenêtre d'installation s'affiche. Aucune donnée personnelle.</td>
+                    </tr>
+                    <tr>
+                        <td>Telegram et webhooks</td>
+                        <td>Notifications sortantes</td>
+                        <td>Titre et statut des tâches — <strong>uniquement</strong> si vous configurez vous-même cette intégration sur un projet</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Transferts hors Union européenne</h3>
+            <p>
+                Google et Netlify sont des sociétés américaines et vos données peuvent être
+                traitées hors de l'Union européenne. Ces transferts sont encadrés par les
+                clauses contractuelles types de la Commission européenne et par le
+                <em>EU–U.S. Data Privacy Framework</em>, auquel les deux sociétés adhèrent.
+            </p>
+        </section>
+
+        <section id="duree">
+            <h2>5. Combien de temps elles sont conservées</h2>
+            <ul>
+                <li><strong>Compte et contenu</strong> : tant que le compte existe. La suppression du compte les efface (voir point 6).</li>
+                <li><strong>Compte inactif</strong> : 3 ans sans connexion, après quoi le compte et son contenu propre sont supprimés. Un message est envoyé à l'adresse du compte un mois avant l'échéance.</li>
+                <li><strong>Documents comptables</strong> liés à une licence payée : 10 ans, durée légale.</li>
+                <li><strong>Journaux techniques</strong> de l'hébergeur : selon la politique de Netlify, généralement quelques semaines.</li>
+            </ul>
+        </section>
+
+        <section id="droits">
+            <h2>6. Vos droits</h2>
+            <p>
+                Le RGPD vous donne un droit d'accès, de rectification, d'effacement, de
+                limitation, d'opposition et de portabilité de vos données.
+            </p>
+
+            <h3>Ce que vous pouvez faire vous-même, tout de suite</h3>
+            <ul>
+                <li><strong>Accéder et rectifier</strong> : vos données de profil et le contenu de vos projets sont modifiables directement dans l'application.</li>
+                <li><strong>Récupérer vos données</strong> : le menu d'export produit vos projets et tâches en JSON, CSV ou iCalendar.</li>
+                <li><strong>Effacer</strong> : <em>Réglages → Supprimer mon compte</em>. Cette action supprime votre profil, les projets dont vous êtes propriétaire et toutes leurs tâches, vos modèles et vos notifications. Vous êtes retiré des projets appartenant à d'autres personnes, dont le contenu est conservé — il ne vous appartient pas.</li>
+            </ul>
+
+            <h3>Pour le reste</h3>
+            <p>
+                Écrivez à <a href="mailto:devkentoolsco@gmail.com">devkentoolsco@gmail.com</a>.
+                Une réponse vous sera apportée dans un délai d'un mois.
+            </p>
+            <p>
+                Si la réponse ne vous satisfait pas, vous pouvez saisir la
+                <a href="https://www.cnil.fr/fr/plaintes" rel="noopener noreferrer" target="_blank">CNIL</a>
+                (3 place de Fontenoy, TSA 80715, 75334 Paris Cedex 07).
+            </p>
+        </section>
+
+        <section id="securite">
+            <h2>7. Sécurité</h2>
+            <ul>
+                <li>Les échanges avec l'application sont chiffrés en HTTPS.</li>
+                <li>Les mots de passe sont gérés par Firebase Authentication et ne transitent jamais par nos propres serveurs.</li>
+                <li>L'accès aux données est contrôlé côté serveur par des règles de sécurité Firestore, indépendantes de l'interface : modifier le code de la page dans un navigateur ne donne pas accès aux données d'autrui.</li>
+                <li>Le site impose <code>X-Frame-Options: DENY</code>, <code>X-Content-Type-Options: nosniff</code> et une politique de permissions restrictive.</li>
+            </ul>
+            <p>
+                Aucun système n'est infaillible. En cas de violation de données susceptible
+                d'engendrer un risque pour vos droits, vous serez informé et la CNIL sera
+                notifiée dans les 72 heures, conformément à l'article 33 du RGPD.
+            </p>
+        </section>
+
+        <section id="cookies">
+            <h2>8. Cookies et stockage local</h2>
+            <p>
+                Corvio Space ne dépose <strong>aucun cookie publicitaire ni de mesure d'audience</strong>.
+                Aucune bannière de consentement n'est donc nécessaire.
+            </p>
+            <p>
+                L'application utilise le stockage local de votre navigateur, qui ne quitte
+                jamais votre appareil, pour les éléments suivants :
+            </p>
+            <table class="legal-table">
+                <thead>
+                    <tr><th>Clé</th><th>Contenu</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>corviospace-theme</code></td><td>Le thème choisi</td></tr>
+                    <tr><td><code>corviospace-settings</code></td><td>Notifications, sons, mode compact</td></tr>
+                    <tr><td><code>corviospace-gamification</code>, <code>corviospace-streak</code></td><td>Points, badges, série de jours consécutifs</td></tr>
+                    <tr><td><code>corviospace_promo_seen</code>, <code>corviospace_promo_dismissed</code>, <code>corviospace-weekly-shown</code></td><td>Compteurs d'affichage, pour ne pas répéter une fenêtre déjà fermée</td></tr>
+                </tbody>
+            </table>
+            <p>
+                Firebase dépose par ailleurs un jeton de session pour vous maintenir connecté.
+                Il est strictement nécessaire au fonctionnement du service.
+            </p>
+        </section>
+
+        <section id="contact">
+            <h2>9. Contact</h2>
+            <p>
+                Pour toute question sur cette politique ou sur le traitement de vos données :
+                <a href="mailto:devkentoolsco@gmail.com">devkentoolsco@gmail.com</a>.
+            </p>
+            <p>
+                Cette politique peut évoluer. Toute modification substantielle sera signalée
+                dans l'application, et la date de mise à jour en tête de page sera corrigée.
+            </p>
+        </section>
+    </main>
+
+    <footer class="legal-footer">
+        <a href="/">Corvio Space</a>
+        <span aria-hidden="true">·</span>
+        <a href='/mentions-legales'>Mentions légales</a>
+        <span aria-hidden="true">·</span>
+        <a aria-current='page' href='/confidentialite'>Confidentialité</a>
+    </footer>
+</body>
+</html>

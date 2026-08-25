@@ -4,7 +4,7 @@
 // IMPORTANT: bump this constant on every deploy. The new SW will install,
 // trigger the "new version available" toast, and reload on user click.
 const CACHE_VERSION = 'v6.2';
-const CACHE_NAME = `corvio-space-${CACHE_VERSION}`;
+const CACHE_NAME = `corviospace-${CACHE_VERSION}`;
 
 // Only used as offline fallback. NEVER served if network is reachable.
 const OFFLINE_FALLBACKS = [

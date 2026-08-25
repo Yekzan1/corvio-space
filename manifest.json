@@ -1,40 +1,40 @@
 {
-    "name": "Corvio Space",
+    "name": "Corvio Space — le tableau partagé de votre équipe",
     "short_name": "Corvio Space",
-    "description": "Application de gestion de tâches et suivi de chantiers collaborative",
+    "description": "Réunit les tâches de votre équipe sur un tableau partagé : échéances, responsables et commentaires au même endroit, mis à jour en direct.",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#090e0c",
-    "theme_color": "#10b981",
+    "background_color": "#F3F6F5",
+    "theme_color": "#46615C",
     "orientation": "portrait-primary",
     "icons": [
         {
-            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981' stroke='white' stroke-width='2'><path d='M13 2L3 14h9l-1 8 10-12h-9l1-8z'/></svg>",
+            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2346615C' stroke='%23F3F6F5' stroke-width='2' stroke-linejoin='round'><path d='M13 2L3 14h9l-1 8 10-12h-9l1-8z'/></svg>",
             "sizes": "192x192",
             "type": "image/svg+xml",
             "purpose": "any"
         },
         {
-            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981' stroke='white' stroke-width='2'><path d='M13 2L3 14h9l-1 8 10-12h-9l1-8z'/></svg>",
+            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2346615C' stroke='%23F3F6F5' stroke-width='2' stroke-linejoin='round'><path d='M13 2L3 14h9l-1 8 10-12h-9l1-8z'/></svg>",
             "sizes": "512x512",
             "type": "image/svg+xml",
             "purpose": "any maskable"
         }
     ],
-    "categories": ["productivity", "utilities", "business"],
+    "categories": ["productivity", "utilities"],
     "lang": "fr",
     "dir": "ltr",
     "shortcuts": [
         {
             "name": "Nouvelle tâche",
             "short_name": "Tâche",
-            "description": "Créer une nouvelle tâche",
+            "description": "Créer une tâche dans le projet courant",
             "url": "/?action=new-task"
         },
         {
             "name": "Nouveau projet",
             "short_name": "Projet",
-            "description": "Créer un nouveau projet",
+            "description": "Créer un projet et son tableau",
             "url": "/?action=new-project"
         }
     ]
