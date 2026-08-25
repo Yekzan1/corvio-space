@@ -809,20 +809,6 @@ function listenToTasks(projectId) {
     } catch(e) {
         loadLocalTasksFallback(projectId);
     }
-        // Fallback query without archived field for backward compatibility
-        const fallbackQ = query(
-            collection(db, 'tasks'),
-            where('projectId', '==', projectId),
-            orderBy('createdAt', 'desc')
-        );
-
-        state.unsubscribers.taskListener = onSnapshot(fallbackQ, snap => {
-            state.tasks = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(t => !t.archived);
-            state.archivedTasks = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(t => t.archived);
-            renderTasks();
-            updateStats();
-        });
-    });
 
     // Archived tasks
     const aq = query(
