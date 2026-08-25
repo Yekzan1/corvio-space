@@ -25,6 +25,16 @@
         <div class="splash-name">Corvio Space</div>
         <div class="splash-spinner"></div>
     </div>
+    <script>
+        setTimeout(() => {
+            const s = document.getElementById('app-splash');
+            if (s) {
+                s.style.opacity = '0';
+                s.style.pointerEvents = 'none';
+                setTimeout(() => { try { s.remove(); } catch(e){} }, 300);
+            }
+        }, 350);
+    </script>
 
     <!-- Auth Screen -->
     <div class="auth-container" id="auth-container">
