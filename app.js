@@ -487,9 +487,12 @@ async function ensureUserProfile(user) {
 // Fade out the startup splash once we know what to show.
 function hideSplash() {
     const splash = document.getElementById('app-splash');
-    if (!splash || splash.classList.contains('hidden')) return;
+    if (!splash) return;
     splash.classList.add('hidden');
-    setTimeout(() => splash.remove(), 450);
+    splash.style.display = 'none';
+    splash.style.opacity = '0';
+    splash.style.pointerEvents = 'none';
+    try { splash.remove(); } catch (e) {}
 }
 // Safety net: prompt auth screen quickly if auth resolution is pending
 setTimeout(() => {
