@@ -793,13 +793,19 @@ function listenToTasks(projectId) {
         orderBy('createdAt', 'desc')
     );
 
-    state.unsubscribers.taskListener = onSnapshot(q, snap => {
-        state.tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderTasks();
-        updateStats();
-        if (state.currentView === 'calendar') renderCalendar();
-        if (state.currentView === 'analytics') renderAnalytics();
-    }, error => {
+    try {
+        state.unsubscribers.taskListener = onSnapshot(q, snap => {
+            state.tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            renderTasks();
+            updateStats();
+            if (state.currentView === 'calendar') renderCalendar();
+            if (state.currentView === 'analytics') renderAnalytics();
+        }, error => {
+            loadLocalTasksFallback(projectId);
+        });
+    } catch(e) {
+        loadLocalTasksFallback(projectId);
+    }
         // Fallback query without archived field for backward compatibility
         const fallbackQ = query(
             collection(db, 'tasks'),
