@@ -42,8 +42,11 @@ export const errorMessages = {
 };
 
 export function handleError(error, context = '') {
-    console.error(`Error in ${context}:`, error);
-    const message = errorMessages[error.code] || errorMessages.default;
+    console.warn(`[Corvio Space] ${context}:`, error?.message || error);
+    if (context.includes('listener') || context.includes('loadMembers') || error?.code === 'permission-denied' || error?.code === 'unavailable') {
+        return;
+    }
+    const message = errorMessages[error?.code] || errorMessages.default;
     toast(message, 'error');
     return message;
 }

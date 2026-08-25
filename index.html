@@ -55,31 +55,24 @@
     <meta name="twitter:description" content="Projets, tâches et commentaires réunis sur un tableau que toute l'équipe voit se mettre à jour en direct. Une alternative aux fils d'e-mails.">
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2346615C' stroke-width='2'><path d='M13 2L3 14h9l-1 8 10-12h-9l1-8z'/></svg>">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='2'><path d='M13 2L3 14h9l-1 8 10-12h-9l1-8z'/></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Lien d'evitement : premier element focusable de la page, invisible
-         jusqu'a ce qu'il recoive le focus. Sans lui, un utilisateur au clavier
-         doit traverser toute la sidebar a chaque chargement. -->
+    <!-- Lien d'evitement -->
     <a href="#main-content" class="skip-link">Aller au contenu</a>
 
-    <!-- Splash / loading screen — shown until Firebase auth resolves, kills the
-         startup flash (login form flashing for logged-in users, black flash). -->
-    <!-- Le fond est ecrit en dur parce qu'il doit s'appliquer AVANT que
-         styles.css soit analyse. Il valait #283533, un vert tres fonce :
-         le premier rendu etait donc sombre, puis basculait en clair des
-         l'arrivee de la feuille de style — exactement le flash que ce
-         splash existe pour supprimer. Il porte desormais la couleur de
-         fond reelle de l'application. -->
-    <div id="app-splash" style="position:fixed;inset:0;background:#F3F6F5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;z-index:99999">
-        <div class="splash-logo">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <!-- Splash / loading screen -->
+    <div id="app-splash" style="position:fixed;inset:0;background:#07080b;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;z-index:99999">
+        <div class="splash-logo" style="width:48px;height:48px;background:linear-gradient(135deg,#10b981,#059669);border-radius:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 24px rgba(16,185,129,0.4)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" style="width:24px;height:24px">
                 <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
             </svg>
         </div>
-        <div class="splash-name">Corvio Space</div>
-        <div class="splash-spinner"></div>
+        <div class="splash-name" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;color:#f8fafc;font-size:1.2rem;letter-spacing:-0.02em">Corvio Space</div>
+        <div class="splash-spinner" style="border-top-color:#10b981"></div>
     </div>
 
     <!-- Auth Screen -->
