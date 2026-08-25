@@ -834,11 +834,15 @@ function listenToTasks(projectId) {
 
     try {
         state.unsubscribers.taskListener = onSnapshot(q, snap => {
-            state.tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            renderTasks();
-            updateStats();
-            if (state.currentView === 'calendar') renderCalendar();
-            if (state.currentView === 'analytics') renderAnalytics();
+            if (snap.docs && snap.docs.length > 0) {
+                state.tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderTasks();
+                updateStats();
+                if (state.currentView === 'calendar') renderCalendar();
+                if (state.currentView === 'analytics') renderAnalytics();
+            } else {
+                loadLocalTasksFallback(projectId);
+            }
         }, error => {
             loadLocalTasksFallback(projectId);
         });
