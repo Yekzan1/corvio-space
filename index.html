@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Corvio Space - Application de gestion de taches collaborative">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Corvio Space - Gestion de Taches</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2'><path d='M13 2L3 14h9l-1 8 10-12h-9l1-8z'/></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Splash / loading screen — shown until Firebase auth resolves, kills the
+         startup flash (login form flashing for logged-in users, black flash). -->
+    <div id="app-splash" style="position:fixed;inset:0;background:#0a0a0f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;z-index:99999">
+        <div class="splash-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+            </svg>
+        </div>
+        <div class="splash-name">Corvio Space</div>
+        <div class="splash-spinner"></div>
+    </div>
+
+    <!-- Auth Screen -->
+    <div class="auth-container" id="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                        </svg>
+                    </div>
+                    <span class="logo-text">Corvio Space</span>
+                </div>
+                <p class="auth-subtitle">Gerez vos projets comme un pro</p>
+            </div>
+
+            <form id="login-form" class="auth-form">
+                <h2>Connexion</h2>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="login-email" placeholder="votre@email.com" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label>Mot de passe</label>
+                    <input type="password" id="login-password" placeholder="********" required autocomplete="current-password" minlength="6">
+                </div>
+                <button type="submit" class="btn-primary btn-full">Se connecter</button>
+                <p class="auth-switch">
+                    Pas encore de compte ? <a href="#" id="show-register">Creer un compte</a>
+                </p>
+            </form>
+
+            <form id="register-form" class="auth-form hidden">
+                <h2>Creer un compte</h2>
+                <div class="form-group">
+                    <label>Pseudo</label>
+                    <input type="text" id="register-name" placeholder="Votre pseudo" required minlength="2" maxlength="30">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="register-email" placeholder="votre@email.com" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label>Mot de passe</label>
+                    <input type="password" id="register-password" placeholder="6 caracteres minimum" required minlength="6" autocomplete="new-password">
+                </div>
+                <button type="submit" class="btn-primary btn-full">Creer mon compte</button>
+                <p class="auth-switch">
+                    Deja un compte ? <a href="#" id="show-login">Se connecter</a>
+                </p>
+            </form>
+
+            <div id="auth-error" class="auth-error"></div>
+        </div>
+    </div>
+
+    <!-- Access Denied Screen -->
+    <div class="auth-container hidden" id="access-denied">
+        <div class="auth-card" style="text-align:center">
+            <div class="auth-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                        </svg>
+                    </div>
+                    <span class="logo-text">Corvio Space</span>
+                </div>
+            </div>
+            <div style="padding:1.5rem">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" style="width:48px;height:48px;margin-bottom:1rem">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <h2 style="color:var(--text-primary);margin-bottom:.5rem">Acces en attente</h2>
+                <p style="color:var(--text-secondary);margin-bottom:.25rem;font-size:.9rem">Le compte <strong class="access-denied-email" style="color:var(--accent)"></strong> n'a pas encore de licence active.</p>
+                <p style="color:var(--text-tertiary);margin-bottom:1.5rem;font-size:.85rem">Contactez un administrateur pour activer votre acces.</p>
+                <button id="access-denied-logout" class="btn-primary btn-full" style="max-width:200px;margin:0 auto">Se deconnecter</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div class="app hidden" id="app">
+        <!-- Notifications Panel -->
+        <div class="notifications-panel" id="notifications-panel">
+            <div class="notifications-header">
+                <h3>Notifications</h3>
+                <button class="btn-text" id="mark-all-read">Tout marquer lu</button>
+            </div>
+            <div class="notifications-list" id="notifications-list">
+                <div class="notifications-empty">Aucune notification</div>
+            </div>
+        </div>
+
+        <!-- Filter Panel -->
+        <div class="filter-panel" id="filter-panel">
+            <div class="filter-header">
+                <h3>Filtres</h3>
+                <button class="btn-text" id="clear-filters">Effacer</button>
+            </div>
+            <div class="filter-content">
+                <div class="filter-group">
+                    <label>Priorite</label>
+                    <select id="filter-priority">
+                        <option value="">Toutes</option>
+                        <option value="high">Haute</option>
+                        <option value="medium">Moyenne</option>
+                        <option value="low">Basse</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Assignee</label>
+                    <select id="filter-assignee">
+                        <option value="">Tous</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Echeance</label>
+                    <select id="filter-date">
+                        <option value="">Toutes</option>
+                        <option value="today">Aujourd'hui</option>
+                        <option value="week">Cette semaine</option>
+                        <option value="overdue">En retard</option>
+                        <option value="no-date">Sans date</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Tags</label>
+                    <div id="filter-tags" class="filter-tags"></div>
+                </div>
+                <div class="filter-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="filter-archived">
+                        Afficher les archives
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                        </svg>
+                    </div>
+                    <span class="logo-text">Corvio Space</span>
+                </div>
+                <button class="btn-icon" id="theme-toggle" title="Changer le theme">
+                    &#x2600;
+                </button>
+            </div>
+
+            <div class="user-info" id="user-info">
+                <label class="user-avatar" id="user-avatar" title="Clique pour changer ton avatar">U
+                    <input type="file" id="avatar-input" accept="image/*" style="display:none;">
+                </label>
+                <div class="user-details">
+                    <span class="user-name" id="user-name">Utilisateur</span>
+                    <span class="user-handle" id="user-handle" title="Clique pour copier ton tag"></span>
+                    <span class="user-email" id="user-email">email@example.com</span>
+                </div>
+                <button class="btn-icon" id="logout-btn" title="Deconnexion">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Quick views (mobile drawer only) -->
+            <div class="sidebar-section sidebar-views">
+                <div class="section-title"><span>Vues</span></div>
+                <div class="sidebar-views-list">
+                    <button class="sidebar-view-btn active" data-view="board">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        <span>Tableau</span>
+                    </button>
+                    <button class="sidebar-view-btn" data-view="today">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <span>Aujourd'hui</span>
+                    </button>
+                    <button class="sidebar-view-btn" data-view="mytasks">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                        <span>Mes taches</span>
+                    </button>
+                    <button class="sidebar-view-btn" data-view="calendar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        <span>Calendrier</span>
+                    </button>
+                    <button class="sidebar-view-btn" data-view="analytics">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                        <span>Analytics</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-title">
+                    <span>Mes Projets</span>
+                    <button class="btn-icon" id="add-project-btn" title="Nouveau projet (P)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
+                </div>
+                <ul class="projects-list" id="projects-list"></ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-title">
+                    <span>Tags</span>
+                    <button class="btn-icon" id="add-tag-btn" title="Nouveau tag (T)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="tags-list" id="tags-list"></div>
+            </div>
+
+            <div class="sidebar-footer">
+                <!-- Gamification Widget -->
+                <div class="gamification-widget" id="gamification-widget" title="Voir mes badges">
+                    <div class="gamification-header">
+                        <div class="gamification-level">
+                            <span class="level-badge">Niv. 1</span>
+                            <span class="level-points">0 pts</span>
+                        </div>
+                        <div class="gamification-streak">🔥 0 jour</div>
+                    </div>
+                    <div class="gamification-progress">
+                        <div class="progress-bar-mini"><div class="progress-fill-mini"></div></div>
+                        <span class="progress-text">0/100 XP</span>
+                    </div>
+                    <div class="gamification-badges"></div>
+                </div>
+
+                <!-- Pomodoro Timer -->
+                <div class="pomodoro-widget">
+                    <div class="pomodoro-header">
+                        <span id="pomodoro-label" class="pomodoro-label work">Focus</span>
+                        <span id="pomodoro-time" class="pomodoro-time">25:00</span>
+                    </div>
+                    <div class="pomodoro-progress-bar">
+                        <div class="pomodoro-progress" id="pomodoro-progress"></div>
+                    </div>
+                    <div class="pomodoro-controls">
+                        <button class="btn-icon" id="pomodoro-start" title="Demarrer">▶</button>
+                        <button class="btn-icon" id="pomodoro-pause" title="Pause" style="display:none;">⏸</button>
+                        <button class="btn-icon" id="pomodoro-reset" title="Reset">↺</button>
+                    </div>
+                </div>
+
+                <div class="stats-card">
+                    <div class="stats-header">
+                        <span>Progression</span>
+                        <span id="progress-percent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="stats-details">
+                        <span><strong id="completed-count">0</strong> terminees</span>
+                        <span><strong id="total-count">0</strong> total</span>
+                    </div>
+                </div>
+                <div class="sidebar-actions">
+                    <button class="btn-text" id="save-template-btn" title="Sauvegarder le projet courant comme template">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                        Template
+                    </button>
+                    <button class="btn-text" id="browse-templates-btn" title="Mes templates">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                            <path d="M4 4h6v6H4z"></path>
+                            <path d="M14 4h6v6h-6z"></path>
+                            <path d="M4 14h6v6H4z"></path>
+                            <path d="M14 14h6v6h-6z"></path>
+                        </svg>
+                        Mes templates
+                    </button>
+                    <button class="btn-text admin-only hidden" id="admin-btn" title="Administration - Gerer les licences">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        Admin
+                    </button>
+                    <button class="btn-text" id="settings-btn" title="Parametres">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                        Parametres
+                    </button>
+                    <!-- Promo: installer l'app sur mobile -->
+                    <button class="btn-text" id="mobile-app-btn" title="Installer Corvio Space sur ton telephone">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                            <line x1="12" y1="18" x2="12" y2="18"></line>
+                        </svg>
+                        Appli mobile
+                    </button>
+                    <!-- Deploy / trigger Netlify build (mobile drawer) -->
+                    <button class="btn-text deploy-btn" id="deploy-btn" title="Lancer un deploiement Netlify">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                            <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path>
+                            <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path>
+                            <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path>
+                            <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path>
+                        </svg>
+                        Lancer le build
+                    </button>
+                </div>
+                <div class="keyboard-hint">
+                    <kbd>N</kbd> Tache
+                    <kbd>G P</kbd> Recherche
+                    <kbd>?</kbd> Aide
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="btn-icon mobile-menu" id="mobile-menu">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+                    <div class="current-project">
+                        <h1 id="project-title">Selectionnez un projet</h1>
+                        <p id="project-description">Creez ou selectionnez un projet pour commencer</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <!-- View Toggle -->
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="board" title="Vue Kanban">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                            </svg>
+                        </button>
+                        <button class="view-btn" data-view="today" title="Aujourd'hui">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <span class="view-badge" id="badge-today"></span>
+                        </button>
+                        <button class="view-btn" data-view="mytasks" title="Mes taches (cross-projets)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                                <path d="M9 11l3 3L22 4"></path>
+                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                            </svg>
+                            <span class="view-badge" id="badge-mytasks"></span>
+                        </button>
+                        <button class="view-btn" data-view="calendar" title="Vue Calendrier">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </button>
+                        <button class="view-btn" data-view="analytics" title="Analytiques">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                                <line x1="18" y1="20" x2="18" y2="10"></line>
+                                <line x1="12" y1="20" x2="12" y2="4"></line>
+                                <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Project Members + Live Presence -->
+                    <div class="project-members" id="project-members">
+                        <div class="presence-avatars" id="presence-avatars" title="Personnes actuellement en ligne sur ce projet"></div>
+                        <div class="members-avatars" id="members-avatars"></div>
+                        <button class="btn-icon btn-add-member" id="add-member-btn" title="Ajouter un membre (M)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="8.5" cy="7" r="4"></circle>
+                                <line x1="20" y1="8" x2="20" y2="14"></line>
+                                <line x1="23" y1="11" x2="17" y2="11"></line>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Edit project settings button -->
+                    <button class="btn-icon" id="edit-project-btn" title="Modifier le projet (webhooks, fond, colonnes...)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                    </button>
+
+                    <!-- Project Share Button -->
+                    <button class="btn-icon" id="share-project-btn" title="Partager le projet (lien public lecture seule)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="18" cy="5" r="3"></circle>
+                            <circle cx="6" cy="12" r="3"></circle>
+                            <circle cx="18" cy="19" r="3"></circle>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                        </svg>
+                    </button>
+
+                    <!-- Filter Button -->
+                    <button class="btn-icon" id="filter-btn" title="Filtres">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                        </svg>
+                    </button>
+
+                    <!-- Export Button -->
+                    <div class="dropdown">
+                        <button class="btn-icon" id="export-btn" title="Exporter">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                        </button>
+                        <div class="dropdown-menu">
+                            <button id="export-json">Export JSON</button>
+                            <button id="export-csv">Export CSV</button>
+                            <button id="export-ics">Export iCal (.ics)</button>
+                            <button id="export-pdf">Imprimer / PDF</button>
+                            <button id="import-csv-btn">Importer CSV</button>
+                            <input type="file" id="import-csv-file" accept=".csv,.json" style="display:none;">
+                        </div>
+                    </div>
+
+                    <!-- Theme picker dropdown -->
+                    <div class="dropdown" id="theme-dropdown">
+                        <button class="btn-icon" id="theme-picker-btn" title="Changer de theme">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="4"></circle>
+                                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+                            </svg>
+                        </button>
+                        <div class="dropdown-menu">
+                            <button data-theme="aurora" class="theme-new">🌌 Aurora <span class="theme-new-badge">NOUVEAU</span></button>
+                            <button data-theme="dark">🌙 Sombre (defaut)</button>
+                            <button data-theme="light">☀️ Clair</button>
+                            <button data-theme="dracula">🧛 Dracula</button>
+                            <button data-theme="nord">❄️ Nord</button>
+                            <button data-theme="solarized">🌅 Solarized</button>
+                            <button data-theme="monokai">🎨 Monokai</button>
+                            <hr style="border-color:rgba(255,255,255,0.1);margin:4px 0">
+                            <button id="toggle-compact">📐 Mode compact</button>
+                            <button id="toggle-sounds">🔊 Sons activer/desactiver</button>
+                        </div>
+                    </div>
+
+                    <!-- Help Button -->
+                    <button class="btn-icon" id="help-btn" title="Aide & raccourcis (?)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </button>
+
+                    <!-- Notifications Bell -->
+                    <button class="btn-icon notifications-btn" id="notifications-btn" title="Notifications">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                        <span class="notification-badge" id="notification-badge">0</span>
+                    </button>
+
+                    <!-- Global Search -->
+                    <button class="btn-icon" id="global-search-btn" title="Recherche globale (G P)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                    </button>
+
+                    <!-- Activity -->
+                    <button class="btn-icon" id="activity-btn" title="Activite recente (A)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                    </button>
+
+                    <!-- Search -->
+                    <div class="search-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                        <input type="text" id="search-input" placeholder="Filtrer... (/)">
+                    </div>
+
+                    <!-- Add Task Button -->
+                    <button class="btn-primary" id="add-task-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span>Nouvelle tache</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Active Filters Display -->
+            <div class="active-filters" id="active-filters" style="display:none;"></div>
+
+            <!-- Kanban Board -->
+            <div class="board" id="board">
+                <div class="column" data-status="todo">
+                    <div class="column-header">
+                        <div class="column-title">
+                            <span class="column-dot todo"></span>
+                            <h2>A faire</h2>
+                            <span class="column-count" id="todo-count">0</span>
+                        </div>
+                    </div>
+                    <div class="column-content" id="todo-tasks"></div>
+                </div>
+
+                <div class="column" data-status="inprogress">
+                    <div class="column-header">
+                        <div class="column-title">
+                            <span class="column-dot inprogress"></span>
+                            <h2>En cours</h2>
+                            <span class="column-count" id="inprogress-count">0</span>
+                        </div>
+                    </div>
+                    <div class="column-content" id="inprogress-tasks"></div>
+                </div>
+
+                <div class="column" data-status="review">
+                    <div class="column-header">
+                        <div class="column-title">
+                            <span class="column-dot review"></span>
+                            <h2>En revue</h2>
+                            <span class="column-count" id="review-count">0</span>
+                        </div>
+                    </div>
+                    <div class="column-content" id="review-tasks"></div>
+                </div>
+
+                <div class="column" data-status="done">
+                    <div class="column-header">
+                        <div class="column-title">
+                            <span class="column-dot done"></span>
+                            <h2>Termine</h2>
+                            <span class="column-count" id="done-count">0</span>
+                        </div>
+                    </div>
+                    <div class="column-content" id="done-tasks"></div>
+                </div>
+            </div>
+
+            <!-- Calendar View -->
+            <div class="calendar-view hidden" id="calendar-container"></div>
+
+            <!-- Analytics View -->
+            <div class="analytics-view hidden" id="analytics-container"></div>
+
+            <!-- My Tasks View (cross-projects) -->
+            <div class="mytasks-view hidden" id="mytasks-container"></div>
+
+            <!-- Today View -->
+            <div class="today-view hidden" id="today-container"></div>
+
+            <!-- Empty State -->
+            <div class="empty-board" id="empty-board">
+                <div class="empty-illustration">
+                    <svg viewBox="0 0 200 200" fill="none">
+                        <circle cx="100" cy="100" r="80" stroke="url(#gradient1)" stroke-width="2" stroke-dasharray="10 5"/>
+                        <rect x="60" y="70" width="80" height="60" rx="8" fill="url(#gradient2)" opacity="0.3"/>
+                        <rect x="70" y="85" width="40" height="6" rx="3" fill="currentColor" opacity="0.5"/>
+                        <rect x="70" y="97" width="60" height="6" rx="3" fill="currentColor" opacity="0.3"/>
+                        <rect x="70" y="109" width="30" height="6" rx="3" fill="currentColor" opacity="0.2"/>
+                        <defs>
+                            <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#6366f1"/>
+                                <stop offset="100%" stop-color="#8b5cf6"/>
+                            </linearGradient>
+                            <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#6366f1"/>
+                                <stop offset="100%" stop-color="#8b5cf6"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <h2>Commencez votre premier projet</h2>
+                <p>Appuyez sur <kbd>P</kbd> ou cliquez ci-dessous</p>
+                <button class="btn-primary btn-large" id="create-first-project">Creer un projet</button>
+            </div>
+        </main>
+
+        <!-- ============================================================
+             MOBILE BOTTOM NAVIGATION (app-native) - visible <= 900px
+             ============================================================ -->
+        <nav class="bottom-nav" id="bottom-nav" aria-label="Navigation principale">
+            <button class="bottom-nav-item active" data-view="board" aria-label="Tableau">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                <span>Tableau</span>
+            </button>
+            <button class="bottom-nav-item" data-view="today" aria-label="Aujourd'hui">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span>Aujourd'hui</span>
+                <span class="bottom-nav-badge" id="bn-badge-today"></span>
+            </button>
+
+            <button class="bottom-nav-fab" id="bottom-nav-fab" aria-label="Nouvelle tache">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" width="26" height="26">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+            </button>
+
+            <button class="bottom-nav-item" data-view="mytasks" aria-label="Mes taches">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+                    <path d="M9 11l3 3L22 4"></path>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                <span>Mes taches</span>
+                <span class="bottom-nav-badge" id="bn-badge-mytasks"></span>
+            </button>
+            <button class="bottom-nav-item" id="bottom-nav-menu" aria-label="Menu">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+                <span>Menu</span>
+            </button>
+        </nav>
+
+        <!-- Mobile sidebar backdrop — MUST live inside .app so it shares the
+             same stacking context as the sidebar (otherwise it paints OVER the
+             drawer: dark + untappable). -->
+        <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+    </div>
+
+    <!-- Modal: Nouveau Projet -->
+    <div class="modal" id="project-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Nouveau projet</h2>
+                <button class="btn-icon modal-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            </div>
+            <form id="project-form">
+                <div class="form-group">
+                    <label>Nom du projet</label>
+                    <input type="text" id="project-name" placeholder="Ex: Refonte du site web" required maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="project-desc" placeholder="Decrivez votre projet..." rows="3" maxlength="500"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Couleur</label>
+                    <div class="color-picker">
+                        <button type="button" class="color-option active" data-color="#6366f1" style="background: #6366f1;"></button>
+                        <button type="button" class="color-option" data-color="#8b5cf6" style="background: #8b5cf6;"></button>
+                        <button type="button" class="color-option" data-color="#ec4899" style="background: #ec4899;"></button>
+                        <button type="button" class="color-option" data-color="#ef4444" style="background: #ef4444;"></button>
+                        <button type="button" class="color-option" data-color="#f59e0b" style="background: #f59e0b;"></button>
+                        <button type="button" class="color-option" data-color="#10b981" style="background: #10b981;"></button>
+                        <button type="button" class="color-option" data-color="#06b6d4" style="background: #06b6d4;"></button>
+                        <button type="button" class="color-option" data-color="#3b82f6" style="background: #3b82f6;"></button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Ambiance / fond du projet</label>
+                    <div class="bg-picker" id="project-bg-picker">
+                        <button type="button" class="bg-option active" data-bg="none">Aucun</button>
+                        <button type="button" class="bg-option" data-bg="aurora" style="background:linear-gradient(135deg,#6366f1,#ec4899);">Aurora</button>
+                        <button type="button" class="bg-option" data-bg="ocean" style="background:linear-gradient(135deg,#06b6d4,#3b82f6);">Ocean</button>
+                        <button type="button" class="bg-option" data-bg="sunset" style="background:linear-gradient(135deg,#f59e0b,#ef4444);">Sunset</button>
+                        <button type="button" class="bg-option" data-bg="forest" style="background:linear-gradient(135deg,#10b981,#065f46);">Forest</button>
+                        <button type="button" class="bg-option" data-bg="midnight" style="background:linear-gradient(135deg,#1e1b4b,#312e81);">Midnight</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Colonnes Kanban (separees par virgules)</label>
+                    <input type="text" id="project-columns" placeholder="A faire, En cours, En revue, Termine" maxlength="200">
+                    <span class="form-hint">Laisse vide pour les 4 colonnes par defaut. Max 6 colonnes.</span>
+                </div>
+                <div class="form-group">
+                    <label>🤖 Notifications externes (optionnel)</label>
+                    <input type="url" id="project-webhook" placeholder="Discord webhook : https://discord.com/api/webhooks/..." maxlength="300">
+                    <input type="text" id="project-telegram-token" placeholder="Telegram bot token : 123456:ABC-DEF..." maxlength="100" style="margin-top:6px;">
+                    <input type="text" id="project-telegram-chat" placeholder="Telegram chat ID : -100123456789" maxlength="50" style="margin-top:6px;">
+                    <span class="form-hint">Recoit une notif a chaque action (creation, deplacement entre colonnes, completion). Tu peux mettre les 2 ou juste un.</span>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-danger" id="delete-project-btn" style="display:none;">Supprimer le projet</button>
+                    <div style="flex:1;"></div>
+                    <button type="button" class="btn-secondary modal-cancel">Annuler</button>
+                    <button type="submit" class="btn-primary">Creer le projet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Ajouter membre -->
+    <div class="modal" id="member-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Inviter des membres</h2>
+                <button class="btn-icon modal-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            </div>
+            <form id="member-form">
+                <div class="form-group">
+                    <label>Tag de l'ami ou email</label>
+                    <div class="input-with-icon">
+                        <span class="input-icon">#</span>
+                        <input type="text" id="member-email" placeholder="pseudo#1234 ou ami@email.com" required autocomplete="off">
+                    </div>
+                    <span class="form-hint">Entrez le tag (pseudo#1234) ou l'email d'un utilisateur inscrit</span>
+                </div>
+                <div class="current-members">
+                    <label>Membres actuels</label>
+                    <div class="members-list" id="modal-members-list"></div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary modal-cancel">Fermer</button>
+                    <button type="submit" class="btn-primary">Inviter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Nouveau Tag -->
+    <div class="modal" id="tag-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>Nouveau tag</h2>
+                <button class="btn-icon modal-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            </div>
+            <form id="tag-form">
+                <div class="form-group">
+                    <label>Nom du tag</label>
+                    <input type="text" id="tag-name" placeholder="Ex: Design, Backend..." required maxlength="20">
+                </div>
+                <div class="form-group">
+                    <label>Couleur</label>
+                    <div class="color-picker">
+                        <button type="button" class="color-option tag-color active" data-color="#ef4444" style="background: #ef4444;"></button>
+                        <button type="button" class="color-option tag-color" data-color="#f59e0b" style="background: #f59e0b;"></button>
+                        <button type="button" class="color-option tag-color" data-color="#10b981" style="background: #10b981;"></button>
+                        <button type="button" class="color-option tag-color" data-color="#06b6d4" style="background: #06b6d4;"></button>
+                        <button type="button" class="color-option tag-color" data-color="#6366f1" style="background: #6366f1;"></button>
+                        <button type="button" class="color-option tag-color" data-color="#8b5cf6" style="background: #8b5cf6;"></button>
+                        <button type="button" class="color-option tag-color" data-color="#ec4899" style="background: #ec4899;"></button>
+                        <button type="button" class="color-option tag-color" data-color="#64748b" style="background: #64748b;"></button>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary modal-cancel">Annuler</button>
+                    <button type="submit" class="btn-primary">Creer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Tache -->
+    <div class="modal" id="task-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="task-modal-title">Nouvelle tache</h2>
+                <button class="btn-icon modal-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            </div>
+            <form id="task-form">
+                <div class="form-group">
+                    <label>Titre de la tache</label>
+                    <input type="text" id="task-title" placeholder="Que devez-vous faire?" required maxlength="200">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="task-desc" placeholder="Ajoutez plus de details..." rows="3" maxlength="2000"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Statut</label>
+                        <select id="task-status">
+                            <option value="todo">A faire</option>
+                            <option value="inprogress">En cours</option>
+                            <option value="review">En revue</option>
+                            <option value="done">Termine</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Priorite</label>
+                        <select id="task-priority">
+                            <option value="low">Basse</option>
+                            <option value="medium" selected>Moyenne</option>
+                            <option value="high">Haute</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Assigne a</label>
+                        <select id="task-assignee">
+                            <option value="">Non assigne</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date limite</label>
+                        <input type="datetime-local" id="task-due">
+                    </div>
+                    <div class="form-group">
+                        <label>Recurrence</label>
+                        <select id="task-recurrence">
+                            <option value="none">Aucune</option>
+                            <option value="daily">Quotidienne</option>
+                            <option value="weekly">Hebdomadaire</option>
+                            <option value="biweekly">Bi-hebdomadaire</option>
+                            <option value="monthly">Mensuelle</option>
+                            <option value="quarterly">Trimestrielle</option>
+                            <option value="yearly">Annuelle</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Tags</label>
+                    <div class="tags-selector" id="tags-selector"></div>
+                </div>
+                <div class="form-group">
+                    <label>Bloquee par (dependances)</label>
+                    <select id="task-blocked-by" multiple size="3"></select>
+                    <span class="form-hint">Ctrl+clic pour selectionner plusieurs taches qui doivent etre terminees avant celle-ci</span>
+                </div>
+                <div class="form-group">
+                    <label>Sous-taches</label>
+                    <div class="subtasks-container" id="subtasks-container"></div>
+                    <button type="button" class="btn-text" id="add-subtask">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Ajouter une sous-tache
+                    </button>
+                </div>
+
+                <!-- Attachments -->
+                <div class="form-group" id="attachments-group">
+                    <label>Pieces jointes <span class="form-hint-inline">(PDF, txt, images... max 700 Ko / fichier)</span></label>
+                    <div class="attachments-list" id="attachments-list"></div>
+                    <div class="attachments-dropzone" id="attachments-dropzone">
+                        <input type="file" id="attachment-input" multiple style="display:none;" accept="*/*">
+                        <button type="button" class="btn-text" id="attachment-pick-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            Ajouter un fichier
+                        </button>
+                        <span class="attachments-hint">ou glisse-depose un fichier ici</span>
+                    </div>
+                </div>
+
+                <!-- Time Tracking -->
+                <div class="form-group" id="time-tracking-container" style="display:none;"></div>
+
+                <!-- Comments Section -->
+                <div class="form-group comments-section" id="comments-section" style="display: none;">
+                    <label>Commentaires</label>
+                    <div class="comments-list" id="comments-list"></div>
+                    <div class="comment-input">
+                        <input type="text" id="comment-input" placeholder="Ajouter un commentaire...">
+                        <button type="button" class="btn-icon" id="send-comment">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <div class="actions-left">
+                        <button type="button" class="btn-danger" id="delete-task-btn" style="display: none;">Supprimer</button>
+                        <button type="button" class="btn-secondary" id="archive-task-btn" style="display: none;">Archiver</button>
+                        <button type="button" class="btn-text" id="duplicate-task-btn" style="display: none;">Dupliquer</button>
+                        <button type="button" class="btn-text" id="task-template-btn" title="Sauvegarder cette tache comme template">⭐ Template</button>
+                        <button type="button" class="btn-text" id="snooze-task-btn" style="display: none;" title="Reporter a demain">😴 Snooze</button>
+                        <button type="button" class="btn-text" id="watch-task-btn" style="display: none;" title="Suivre / arreter de suivre">👁 Suivre</button>
+                        <button type="button" class="btn-text" id="focus-task-btn" style="display: none;" title="Mode focus (F)">🎯 Focus</button>
+                    </div>
+                    <div class="actions-right">
+                        <button type="button" class="btn-secondary modal-cancel">Annuler</button>
+                        <button type="submit" class="btn-primary" id="save-task-btn">Creer</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Raccourcis clavier -->
+    <div class="modal" id="shortcuts-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Raccourcis clavier</h2>
+                <button class="btn-icon modal-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            </div>
+            <div class="shortcuts-list">
+                <div class="shortcut-group">
+                    <h3>Navigation</h3>
+                    <div class="shortcut-item"><kbd>G</kbd><kbd>H</kbd><span>Vue Board</span></div>
+                    <div class="shortcut-item"><kbd>G</kbd><kbd>C</kbd><span>Vue Calendrier</span></div>
+                    <div class="shortcut-item"><kbd>G</kbd><kbd>A</kbd><span>Vue Analytics</span></div>
+                    <div class="shortcut-item"><kbd>G</kbd><kbd>P</kbd><span>Recherche globale</span></div>
+                    <div class="shortcut-item"><kbd>1</kbd>-<kbd>4</kbd><span>Colonnes</span></div>
+                </div>
+                <div class="shortcut-group">
+                    <h3>Actions</h3>
+                    <div class="shortcut-item"><kbd>N</kbd><span>Nouvelle tache</span></div>
+                    <div class="shortcut-item"><kbd>P</kbd><span>Nouveau projet</span></div>
+                    <div class="shortcut-item"><kbd>T</kbd><span>Nouveau tag</span></div>
+                    <div class="shortcut-item"><kbd>M</kbd><span>Ajouter membre</span></div>
+                    <div class="shortcut-item"><kbd>C</kbd><span>Creer tache rapide</span></div>
+                </div>
+                <div class="shortcut-group">
+                    <h3>Autres</h3>
+                    <div class="shortcut-item"><kbd>D</kbd><span>Theme sombre/clair</span></div>
+                    <div class="shortcut-item"><kbd>B</kbd><span>Mes badges</span></div>
+                    <div class="shortcut-item"><kbd>A</kbd><span>Activite</span></div>
+                    <div class="shortcut-item"><kbd>S</kbd><span>Parametres</span></div>
+                    <div class="shortcut-item"><kbd>?</kbd><span>Cette aide</span></div>
+                    <div class="shortcut-item"><kbd>Esc</kbd><span>Fermer</span></div>
+                </div>
+                <div class="shortcut-group">
+                    <h3>Mobile</h3>
+                    <div class="shortcut-item"><span>👉 Swipe droite</span><span>Terminer</span></div>
+                    <div class="shortcut-item"><span>👈 Swipe gauche</span><span>Archiver</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Parametres -->
+    <!-- Admin Panel Modal -->
+    <div class="modal" id="admin-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Administration - Licences</h2>
+                <button class="btn-icon modal-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            </div>
+            <div id="admin-panel-content"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="settings-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Parametres</h2>
+                <button class="btn-icon modal-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            </div>
+            <div id="settings-content"></div>
+        </div>
+    </div>
+
+    <!-- Activity Panel -->
+    <div class="activity-panel" id="activity-panel">
+        <div class="activity-header">
+            <h3>Activite recente</h3>
+            <button class="btn-icon" onclick="document.getElementById('activity-panel').classList.remove('open')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+        <div class="activity-feed" id="activity-feed">
+            <div class="activity-empty">Aucune activite recente</div>
+        </div>
+    </div>
+
+    <!-- Modal: Recherche globale -->
+    <div class="modal" id="search-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-search">
+            <div class="search-modal-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" id="global-search-input" placeholder="Rechercher taches, projets, tags..." autofocus>
+                <kbd>Esc</kbd>
+            </div>
+            <div class="search-results" id="search-results">
+                <div class="search-hint">
+                    <p>Tapez pour rechercher dans :</p>
+                    <ul>
+                        <li>📋 Taches</li>
+                        <li>📁 Projets</li>
+                        <li>🏷️ Tags</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Badges -->
+    <div class="modal" id="badges-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>🏆 Mes Badges</h2>
+                <button class="btn-icon modal-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            </div>
+            <div id="badges-content"></div>
+        </div>
+    </div>
+
+    <!-- Modal: Promo "Corvio Space sur mobile" (desktop) -->
+    <div class="modal" id="mobile-promo-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-promo">
+            <button class="btn-icon modal-close promo-close" aria-label="Fermer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+
+            <div class="promo-hero">
+                <span class="promo-badge">✨ NOUVEAU</span>
+                <h2>Corvio Space tient dans ta poche</h2>
+                <p>Installe l'appli sur ton téléphone et gère tes tâches partout — comme une vraie app native, sans passer par un store.</p>
+            </div>
+
+            <div class="promo-bridge">
+                <div class="promo-qr">
+                    <img id="promo-qr-img" alt="QR code Corvio Space" width="150" height="150">
+                    <span>Scanne avec ton téléphone 📷</span>
+                </div>
+                <div class="promo-share">
+                    <label>Ou ouvre ce lien sur ton tél :</label>
+                    <div class="promo-url" id="promo-url"></div>
+                    <div class="promo-share-actions">
+                        <button class="btn-primary" id="promo-copy">Copier le lien</button>
+                        <button class="btn-secondary hidden" id="promo-install">⚡ Installer maintenant</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="promo-steps">
+                <div class="promo-tabs">
+                    <button class="promo-tab active" data-os="ios">🍎 iPhone</button>
+                    <button class="promo-tab" data-os="android">🤖 Android</button>
+                </div>
+                <ol class="promo-steplist" id="promo-steps-ios">
+                    <li>Ouvre ce site dans <strong>Safari</strong>.</li>
+                    <li>Touche le bouton <strong>Partager</strong> (le carré avec une flèche ↑).</li>
+                    <li>Choisis <strong>« Sur l'écran d'accueil »</strong>.</li>
+                    <li>Touche <strong>Ajouter</strong> — l'icône Corvio Space apparaît sur ton écran ! 🎉</li>
+                </ol>
+                <ol class="promo-steplist hidden" id="promo-steps-android">
+                    <li>Ouvre ce site dans <strong>Chrome</strong>.</li>
+                    <li>Touche le menu <strong>⋮</strong> (en haut à droite).</li>
+                    <li>Choisis <strong>« Installer l'application »</strong> (ou « Ajouter à l'écran d'accueil »).</li>
+                    <li>Confirme — Corvio Space s'installe comme une vraie appli ! 🎉</li>
+                </ol>
+            </div>
+
+            <button class="btn-text promo-dismiss" id="promo-dismiss">Ne plus afficher</button>
+        </div>
+    </div>
+
+    <!-- Floating Action Button (mobile) - Quick add task -->
+    <button class="fab" id="fab-new-task" title="Nouvelle tache rapide">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+    </button>
+
+    <!-- Confetti canvas -->
+    <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
+
+    <!-- Quick Capture (press +) -->
+    <div class="quick-capture" id="quick-capture">
+        <div class="quick-capture-overlay"></div>
+        <div class="quick-capture-box">
+            <div class="quick-capture-icon">⚡</div>
+            <input type="text" id="quick-capture-input" placeholder="Tape ta tache… (ex: Reviser SQL demain 18h !haute)" autocomplete="off">
+            <div class="quick-capture-hint">
+                <kbd>Enter</kbd> creer · <kbd>Esc</kbd> fermer · Astuces : <code>demain 18h</code>, <code>!haute</code>, <code>!urgent</code>, <code>#tag</code>
+            </div>
+        </div>
+    </div>
+
+    <!-- Long-press contextual menu (mobile) -->
+    <div class="context-menu" id="context-menu">
+        <button data-action="open">📝 Ouvrir</button>
+        <button data-action="done">✓ Terminer</button>
+        <button data-action="snooze">😴 Reporter a demain</button>
+        <button data-action="duplicate">📋 Dupliquer</button>
+        <button data-action="archive">📦 Archiver</button>
+        <button data-action="delete" class="danger">🗑 Supprimer</button>
+    </div>
+
+    <!-- Weekly summary modal -->
+    <div class="modal" id="weekly-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📊 Ton resume de la semaine</h2>
+                <button class="btn-icon modal-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            </div>
+            <div id="weekly-content"></div>
+        </div>
+    </div>
+
+    <!-- Bulk Action Bar (apparait quand des taches sont selectionnees) -->
+    <div class="bulk-action-bar" id="bulk-action-bar">
+        <span class="bulk-count"><span id="bulk-count-num">0</span> selectionnee(s)</span>
+        <div class="bulk-actions">
+            <button class="btn-text" id="bulk-status-todo">→ A faire</button>
+            <button class="btn-text" id="bulk-status-inprogress">→ En cours</button>
+            <button class="btn-text" id="bulk-status-done">→ Termine</button>
+            <button class="btn-text" id="bulk-archive">Archiver</button>
+            <button class="btn-danger" id="bulk-delete">Supprimer</button>
+            <button class="btn-icon" id="bulk-clear" title="Deselectionner">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Focus Mode Overlay -->
+    <div class="focus-mode" id="focus-mode">
+        <button class="focus-close" id="focus-close" title="Sortir du focus (Esc)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        <div class="focus-content" id="focus-content"></div>
+    </div>
+
+    <!-- Modal: Aide complete -->
+    <div class="modal" id="help-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Guide complet de Corvio Space</h2>
+                <button class="btn-icon modal-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            </div>
+            <div id="help-content"></div>
+        </div>
+    </div>
+
+    <!-- Modal: Templates Browser -->
+    <div class="modal" id="templates-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Mes templates</h2>
+                <button class="btn-icon modal-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            </div>
+            <p class="text-muted" style="margin:0 0 1rem">Cliquez sur "Utiliser" pour ajouter les taches du template au projet courant.</p>
+            <div class="templates-list" id="templates-list">
+                <div class="templates-empty">Aucun template</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>

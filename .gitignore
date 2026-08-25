@@ -1,0 +1,22 @@
+.DS_Store
+node_modules/
+.env
+.env.*
+*.log
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+.firebaserc
+
+# Editors
+*.swp
+.vscode/
+.idea/
+
+# Memory (Claude Code)
+memory/
+
+# Local Netlify folder
+.netlify

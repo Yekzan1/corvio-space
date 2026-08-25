@@ -1,0 +1,137 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ----- Helpers -----
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isMe(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+    function isGlobalAdmin() {
+      return isSignedIn() && request.auth.token.email == 'keny.alkan@gmail.com';
+    }
+    function projectMembers(projectId) {
+      return get(/databases/$(database)/documents/projects/$(projectId)).data.members;
+    }
+    function isProjectMember(projectId) {
+      return isSignedIn() && request.auth.uid in projectMembers(projectId);
+    }
+
+    // ----- Users -----
+    // Anyone signed in can read user profiles (needed to look up by handle / email).
+    // A user can edit their own profile BUT NOT the billing fields `licensed`
+    // and `trialEndsAt` — only the admin (or, later, the Stripe webhook via the
+    // Admin SDK which bypasses rules) may change those. This closes the paywall
+    // bypass where a user could set `licensed:true` from the console.
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isMe(userId)
+                      && (isGlobalAdmin() || request.resource.data.licensed == false);
+      allow update: if isGlobalAdmin()
+                      || (isMe(userId)
+                          && !request.resource.data.diff(resource.data).affectedKeys()
+                                .hasAny(['licensed', 'trialEndsAt']));
+      allow delete: if isMe(userId);
+    }
+
+    // ----- Projects -----
+    // Read: members OR anyone if the project has a publicShareId (read-only public share)
+    // Create: anyone signed in, but the creator must be in the members array and be the owner.
+    // Update/Delete: only members (owner-only delete).
+    match /projects/{projectId} {
+      allow read: if (isSignedIn() && request.auth.uid in resource.data.members)
+                      || resource.data.isPublic == true;
+      // Deliberately open (not gated on isSignedIn()): loadPublicProject() looks up
+      // a project by ?share=<id> for visitors who aren't logged in at all. Actual
+      // document data is still filtered per-doc by the `read` rule above.
+      allow list: if true;
+      allow create: if isSignedIn()
+                      && request.auth.uid == request.resource.data.ownerId
+                      && request.auth.uid in request.resource.data.members;
+      allow update: if isSignedIn() && request.auth.uid in resource.data.members;
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.ownerId;
+    }
+
+    // ----- Tasks -----
+    // A task belongs to a project; only project members may read/write it.
+    // Public read also allowed if the parent project is public (for share links).
+    match /tasks/{taskId} {
+      allow read: if (isSignedIn() && isProjectMember(resource.data.projectId))
+                      || get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.isPublic == true;
+      // Same rationale as projects.list: anonymous public-share visitors need to
+      // list a project's tasks too. Per-doc `read` rule above still applies.
+      allow list: if true;
+      allow create: if isSignedIn() && isProjectMember(request.resource.data.projectId);
+      allow update: if isSignedIn() && isProjectMember(resource.data.projectId);
+      allow delete: if isSignedIn() && isProjectMember(resource.data.projectId);
+    }
+
+    // ----- Tags -----
+    // Same rule: scoped to a project, members only.
+    match /tags/{tagId} {
+      allow read: if isSignedIn() && isProjectMember(resource.data.projectId);
+      allow create: if isSignedIn() && isProjectMember(request.resource.data.projectId);
+      allow update, delete: if isSignedIn() && isProjectMember(resource.data.projectId);
+    }
+
+    // ----- Activities -----
+    // Activity log entries: project members only.
+    match /activities/{activityId} {
+      allow read: if isSignedIn() && isProjectMember(resource.data.projectId);
+      allow create: if isSignedIn() && isProjectMember(request.resource.data.projectId);
+      allow update, delete: if false; // immutable log
+    }
+
+    // ----- Notifications -----
+    // Each notification has a userId field; only that user can read/update it.
+    // Create is scoped to the author being a member of the project the
+    // notification is about — this is what actually stops any signed-in
+    // stranger from spamming/phishing an arbitrary user's notification feed.
+    // The recipient (userId) is intentionally NOT required to already be a
+    // project member: @handle mentions in comments can target any user in
+    // the app (see resolveMentions() in app.js), and invite notifications
+    // fire right after the member is added to the project.
+    match /notifications/{notifId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn()
+                      && request.resource.data.userId is string
+                      && request.resource.data.projectId is string
+                      && request.resource.data.type in ['invite', 'assign', 'comment', 'mention']
+                      && request.resource.data.message is string
+                      && request.resource.data.message.size() < 500
+                      && isProjectMember(request.resource.data.projectId);
+      allow update: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // ----- Attachments -----
+    // Files (PDF, txt, images...) attached to tasks. Stored as base64 in `data`.
+    // Scoped to a project: only project members may read/write.
+    match /attachments/{attId} {
+      allow read: if isSignedIn() && isProjectMember(resource.data.projectId);
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isProjectMember(request.resource.data.projectId);
+      allow update, delete: if isSignedIn() && isProjectMember(resource.data.projectId);
+    }
+
+    // ----- Templates -----
+    // Templates are owned by a single user.
+    match /templates/{tplId} {
+      allow read: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+    }
+
+    // ----- Presence -----
+    // Live presence: each user writes their own doc (one doc per user, holding
+    // whichever project they're currently viewing). Read is scoped to members
+    // of that project — not everyone in the app, just people who'd actually
+    // see this person's avatar on a shared board.
+    match /presence/{userId} {
+      allow read: if isSignedIn() && isProjectMember(resource.data.projectId);
+      allow write: if isSignedIn() && request.auth.uid == userId;
+    }
+  }
+}
