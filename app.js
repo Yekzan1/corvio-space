@@ -79,6 +79,7 @@ function initStarterWorkspace(userId) {
                 projectId: projectId,
                 title: "Rénovation toiture & zinguerie",
                 description: "Chantier M. Delorme à Arnas. Dépose tuiles et pose étanchéité zinc.",
+                status: "todo",
                 column: "todo",
                 priority: "high",
                 assigneeId: userId || 'user_demo',
@@ -91,7 +92,8 @@ function initStarterWorkspace(userId) {
                 projectId: projectId,
                 title: "Pose carrelage & plomberie",
                 description: "Boulangerie des Halles. Raccordement eau et faïence murale.",
-                column: "in_progress",
+                status: "inprogress",
+                column: "inprogress",
                 priority: "medium",
                 assigneeId: userId || 'user_demo',
                 dueDate: new Date(Date.now() + 3 * 86400000).toISOString(),
@@ -103,6 +105,7 @@ function initStarterWorkspace(userId) {
                 projectId: projectId,
                 title: "Ravalement façade pierre dorée",
                 description: "Domaine des Vignes à Anse. Nettoyage basse pression et rejointoiement à la chaux.",
+                status: "review",
                 column: "review",
                 priority: "low",
                 assigneeId: userId || 'user_demo',
@@ -115,6 +118,7 @@ function initStarterWorkspace(userId) {
                 projectId: projectId,
                 title: "Électricité générale showroom",
                 description: "Garage Automobile. Tableau triphasé et éclairage LED basse consommation.",
+                status: "done",
                 column: "done",
                 priority: "medium",
                 assigneeId: userId || 'user_demo',
@@ -394,7 +398,10 @@ function loadLocalStorageFallback() {
 function loadLocalTasksFallback(projectId) {
     try {
         const storedTasks = JSON.parse(localStorage.getItem('corviospace_tasks') || '[]');
-        state.tasks = storedTasks.filter(t => t.projectId === projectId && !t.archived);
+        state.tasks = storedTasks.filter(t => t.projectId === projectId && !t.archived).map(t => ({
+            ...t,
+            status: t.status || (t.column === 'in_progress' ? 'inprogress' : t.column) || 'todo'
+        }));
         state.archivedTasks = storedTasks.filter(t => t.projectId === projectId && t.archived);
         renderTasks();
         updateStats();
