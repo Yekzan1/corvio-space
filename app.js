@@ -75,11 +75,11 @@ function initStarterWorkspace(userId) {
 
         const starterTasks = [
             {
-                id: 'task_' + Math.random().toString(36).slice(2, 9),
+                id: 'task_1',
                 projectId: projectId,
                 title: "Rénovation toiture & zinguerie",
                 description: "Chantier M. Delorme à Arnas. Dépose tuiles et pose étanchéité zinc.",
-                status: "todo",
+                column: "todo",
                 priority: "high",
                 assigneeId: userId || 'user_demo',
                 dueDate: new Date(Date.now() + 86400000).toISOString(),
@@ -87,11 +87,11 @@ function initStarterWorkspace(userId) {
                 tags: ["Toiture", "Urgent"]
             },
             {
-                id: 'task_' + Math.random().toString(36).slice(2, 9),
+                id: 'task_2',
                 projectId: projectId,
                 title: "Pose carrelage & plomberie",
                 description: "Boulangerie des Halles. Raccordement eau et faïence murale.",
-                status: "inprogress",
+                column: "in_progress",
                 priority: "medium",
                 assigneeId: userId || 'user_demo',
                 dueDate: new Date(Date.now() + 3 * 86400000).toISOString(),
@@ -99,11 +99,11 @@ function initStarterWorkspace(userId) {
                 tags: ["Carrelage", "Plomberie"]
             },
             {
-                id: 'task_' + Math.random().toString(36).slice(2, 9),
+                id: 'task_3',
                 projectId: projectId,
                 title: "Ravalement façade pierre dorée",
                 description: "Domaine des Vignes à Anse. Nettoyage basse pression et rejointoiement à la chaux.",
-                status: "review",
+                column: "review",
                 priority: "low",
                 assigneeId: userId || 'user_demo',
                 dueDate: new Date(Date.now() - 86400000).toISOString(),
@@ -111,11 +111,11 @@ function initStarterWorkspace(userId) {
                 tags: ["Façade", "Patrimoine"]
             },
             {
-                id: 'task_' + Math.random().toString(36).slice(2, 9),
+                id: 'task_4',
                 projectId: projectId,
                 title: "Électricité générale showroom",
                 description: "Garage Automobile. Tableau triphasé et éclairage LED basse consommation.",
-                status: "done",
+                column: "done",
                 priority: "medium",
                 assigneeId: userId || 'user_demo',
                 completedAt: new Date().toISOString(),
@@ -378,58 +378,6 @@ async function safeAsync(fn, context = '') {
 
 
 // Local Storage & Workspace Engine Fallbacks
-function initStarterWorkspace(userId) {
-    if (!localStorage.getItem('corviospace_projects')) {
-        const starterProject = {
-            id: 'proj_corvio_starter',
-            name: 'Chantiers & Projets 2026',
-            description: 'Espace de travail principal pour le suivi des activites Corvio',
-            color: '#10b981',
-            icon: 'lucide-layout',
-            ownerId: userId || 'contact_corvio',
-            members: [{ uid: userId || 'contact_corvio', email: 'contact.corvio@icloud.com', role: 'owner' }],
-            createdAt: new Date().toISOString()
-        };
-        const starterTasks = [
-            {
-                id: 'task_1',
-                projectId: 'proj_corvio_starter',
-                title: 'Bienvenue sur Corvio Space !',
-                description: 'Explorez vos projets, organisez vos taches par colonnes et suivez votre progression.',
-                column: 'todo',
-                priority: 'medium',
-                color: '#10b981',
-                tags: ['General', 'Decouverte'],
-                createdAt: new Date().toISOString()
-            },
-            {
-                id: 'task_2',
-                projectId: 'proj_corvio_starter',
-                title: 'Parametrer les notifications & le theme sombre',
-                description: 'Adaptez votre espace a vos preferences de travail.',
-                column: 'in_progress',
-                priority: 'high',
-                color: '#3b82f6',
-                tags: ['Configuration'],
-                createdAt: new Date().toISOString()
-            },
-            {
-                id: 'task_3',
-                projectId: 'proj_corvio_starter',
-                title: 'Ajouter les premiers membres et collaborateurs',
-                description: 'Invitez vos collegues a collaborer sur vos tableaux en temps reel.',
-                column: 'done',
-                priority: 'low',
-                color: '#8b5cf6',
-                tags: ['Equipe'],
-                createdAt: new Date().toISOString()
-            }
-        ];
-        localStorage.setItem('corviospace_projects', JSON.stringify([starterProject]));
-        localStorage.setItem('corviospace_tasks', JSON.stringify(starterTasks));
-    }
-}
-
 function loadLocalStorageFallback() {
     try {
         const storedProjects = JSON.parse(localStorage.getItem('corviospace_projects') || '[]');
