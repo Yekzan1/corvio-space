@@ -41,7 +41,7 @@ const PREFERENCES = ['systeme', 'clair', 'sombre'];
 // Couleur de la barre systeme du navigateur mobile, par thème resolu. Elles
 // doivent rester EGALES a --bg-main : c'est ce qui fait que la barre et la
 // page se confondent au lieu de former un bandeau.
-const COULEUR_BARRE = { light: '#F3F6F5', dark: '#0F1614' };
+const COULEUR_BARRE = { light: '#f8fafc', dark: '#07080b' };
 
 let _mediaSombre = null;
 

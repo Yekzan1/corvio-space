@@ -414,3 +414,411 @@ body {
 #service-worker-toast, .offline-banner, #bandeau-hors-ligne {
     display: none !important;
 }
+
+
+
+/* ==========================================================================
+   CORVIO SPACE — OFFICIAL CORVIO SAAS LUXURY DESIGN SYSTEM (DARK & LIGHT)
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+/* --- SHARED BASE VARIABLES --- */
+:root {
+    --primary: #10b981;
+    --primary-dark: #059669;
+    --primary-light: #34d399;
+    --primary-glow: rgba(16, 185, 129, 0.3);
+    
+    --accent: #10b981;
+    --accent-dark: #059669;
+    --accent-light: #34d399;
+    --accent-glow: rgba(16, 185, 129, 0.25);
+    --accent-deep: #047857;
+    
+    --success: #10b981;
+    --success-light: #34d399;
+    --warning: #f59e0b;
+    --warning-light: #fbbf24;
+    --danger: #ef4444;
+    --danger-light: #f87171;
+    --info: #3b82f6;
+
+    --sidebar-width: 260px;
+    --header-height: 68px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+}
+
+/* ==========================================================================
+   DARK THEME (OBSIDIAN NOIR & CORVIO EMERALD GLOW)
+   ========================================================================== */
+html[data-theme="dark"], html:not([data-theme="light"]) {
+    --bg-dark: #07080b;
+    --bg-main: #07080b;
+    --surface-dark: #0c0e14;
+    --bg-card: rgba(16, 20, 30, 0.85);
+    --bg-card-hover: rgba(24, 30, 44, 0.95);
+    --bg-elevated: #111520;
+    --bg-input: rgba(255, 255, 255, 0.04);
+    --bg-hover: rgba(255, 255, 255, 0.06);
+    --bg-secondary: #0c0e15;
+    --bg-tertiary: #141824;
+
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --text-tertiary: #475569;
+
+    --border: rgba(255, 255, 255, 0.07);
+    --border-light: rgba(255, 255, 255, 0.12);
+    
+    --glass-bg: rgba(10, 12, 18, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.08);
+
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    --shadow-lg: 0 16px 48px -8px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    --shadow-glow: 0 0 25px rgba(16, 185, 129, 0.2);
+}
+
+html[data-theme="dark"] body, html:not([data-theme="light"]) body {
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif !important;
+    background-color: #07080b !important;
+    background-image: 
+        radial-gradient(at 15% 15%, rgba(16, 185, 129, 0.06) 0px, transparent 50%),
+        radial-gradient(at 85% 85%, rgba(59, 130, 246, 0.04) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(16, 185, 129, 0.02) 0px, transparent 60%) !important;
+    color: #f8fafc !important;
+    letter-spacing: -0.01em !important;
+    -webkit-font-smoothing: antialiased !important;
+}
+
+html[data-theme="dark"] .sidebar, html:not([data-theme="light"]) .sidebar {
+    background: rgba(10, 12, 18, 0.9) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3) !important;
+}
+
+html[data-theme="dark"] .main-header, html:not([data-theme="light"]) .main-header {
+    background: rgba(8, 10, 15, 0.75) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+html[data-theme="dark"] .column, html:not([data-theme="light"]) .column {
+    background: rgba(13, 16, 24, 0.55) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3) !important;
+}
+
+html[data-theme="dark"] .task-card, html:not([data-theme="light"]) .task-card {
+    background: rgba(18, 22, 34, 0.85) !important;
+    border: 1px solid rgba(255, 255, 255, 0.07) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
+}
+
+html[data-theme="dark"] .task-card:hover, html:not([data-theme="light"]) .task-card:hover {
+    background: rgba(25, 31, 48, 0.95) !important;
+    border-color: rgba(16, 185, 129, 0.4) !important;
+    box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5), 0 0 18px rgba(16, 185, 129, 0.15) !important;
+}
+
+html[data-theme="dark"] .auth-container, html:not([data-theme="light"]) .auth-container {
+    background: 
+        radial-gradient(circle at 50% 25%, rgba(16, 185, 129, 0.12) 0%, transparent 60%),
+        radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+        #07080b !important;
+}
+
+html[data-theme="dark"] .auth-card, html:not([data-theme="light"]) .auth-card {
+    background: rgba(13, 16, 24, 0.88) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 24px 64px -12px rgba(0, 0, 0, 0.7), 0 0 32px rgba(16, 185, 129, 0.1) !important;
+}
+
+html[data-theme="dark"] .auth-form input, html:not([data-theme="light"]) .auth-form input {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+html[data-theme="dark"] .auth-form input:focus, html:not([data-theme="light"]) .auth-form input:focus {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2), 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* ==========================================================================
+   LIGHT THEME (CORVIO PURE PORCELAINE & CRUSHED EMERALD)
+   ========================================================================== */
+html[data-theme="light"] {
+    --bg-dark: #f8fafc;
+    --bg-main: #f8fafc;
+    --surface-dark: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #ffffff;
+    --bg-elevated: #ffffff;
+    --bg-input: #f1f5f9;
+    --bg-hover: rgba(0, 0, 0, 0.04);
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f1f5f9;
+
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --text-tertiary: #94a3b8;
+
+    --border: rgba(0, 0, 0, 0.08);
+    --border-light: rgba(0, 0, 0, 0.12);
+    
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(0, 0, 0, 0.06);
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 6px 20px -2px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 20px 40px -8px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+    --shadow-glow: 0 0 20px rgba(16, 185, 129, 0.15);
+}
+
+html[data-theme="light"] body {
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif !important;
+    background-color: #f8fafc !important;
+    background-image: 
+        radial-gradient(at 15% 15%, rgba(16, 185, 129, 0.04) 0px, transparent 50%),
+        radial-gradient(at 85% 85%, rgba(59, 130, 246, 0.03) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(16, 185, 129, 0.02) 0px, transparent 60%) !important;
+    color: #0f172a !important;
+    letter-spacing: -0.01em !important;
+    -webkit-font-smoothing: antialiased !important;
+}
+
+html[data-theme="light"] .sidebar {
+    background: #ffffff !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.07) !important;
+    box-shadow: 2px 0 16px rgba(0, 0, 0, 0.02) !important;
+    color: #0f172a !important;
+}
+
+html[data-theme="light"] .sidebar-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+}
+
+html[data-theme="light"] .logo-text {
+    background: linear-gradient(180deg, #0f172a 0%, #334155 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
+
+html[data-theme="light"] .user-info {
+    background: rgba(0, 0, 0, 0.02) !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+}
+
+html[data-theme="light"] .user-info:hover {
+    background: rgba(0, 0, 0, 0.04) !important;
+    border-color: rgba(16, 185, 129, 0.4) !important;
+}
+
+html[data-theme="light"] .user-name {
+    color: #0f172a !important;
+}
+
+html[data-theme="light"] .user-email {
+    color: #64748b !important;
+}
+
+html[data-theme="light"] .user-handle {
+    background: rgba(16, 185, 129, 0.1) !important;
+    color: #059669 !important;
+    border: 1px solid rgba(16, 185, 129, 0.2) !important;
+}
+
+html[data-theme="light"] .sidebar-views .nav-item,
+html[data-theme="light"] .view-item,
+html[data-theme="light"] .project-item {
+    color: #475569 !important;
+}
+
+html[data-theme="light"] .sidebar-views .nav-item:hover,
+html[data-theme="light"] .view-item:hover,
+html[data-theme="light"] .project-item:hover {
+    background: rgba(0, 0, 0, 0.04) !important;
+    color: #0f172a !important;
+}
+
+html[data-theme="light"] .sidebar-views .nav-item.active,
+html[data-theme="light"] .project-item.active {
+    background: rgba(16, 185, 129, 0.08) !important;
+    color: #059669 !important;
+    border: 1px solid rgba(16, 185, 129, 0.2) !important;
+    font-weight: 600 !important;
+}
+
+html[data-theme="light"] .main-header {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+}
+
+html[data-theme="light"] .current-project h1 {
+    color: #0f172a !important;
+}
+
+html[data-theme="light"] .role-badge {
+    background: rgba(16, 185, 129, 0.1) !important;
+    color: #059669 !important;
+    border: 1px solid rgba(16, 185, 129, 0.25) !important;
+}
+
+html[data-theme="light"] .search-box {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+html[data-theme="light"] .search-box input {
+    color: #0f172a !important;
+}
+
+html[data-theme="light"] .search-box:focus-within {
+    background: #ffffff !important;
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
+}
+
+html[data-theme="light"] .btn-icon {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    color: #475569 !important;
+}
+
+html[data-theme="light"] .btn-icon:hover {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+}
+
+html[data-theme="light"] .column {
+    background: rgba(241, 245, 249, 0.7) !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03) !important;
+}
+
+html[data-theme="light"] .column-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+html[data-theme="light"] .column-title h2 {
+    color: #0f172a !important;
+}
+
+html[data-theme="light"] .column-count {
+    background: #ffffff !important;
+    color: #64748b !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+html[data-theme="light"] .task-card {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.07) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.02) !important;
+}
+
+html[data-theme="light"] .task-card:hover {
+    background: #ffffff !important;
+    border-color: rgba(16, 185, 129, 0.4) !important;
+    box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.08), 0 0 12px rgba(16, 185, 129, 0.1) !important;
+}
+
+html[data-theme="light"] .task-card-title {
+    color: #0f172a !important;
+}
+
+html[data-theme="light"] .task-card-desc {
+    color: #475569 !important;
+}
+
+html[data-theme="light"] .task-tag {
+    background: #f1f5f9 !important;
+    color: #334155 !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+}
+
+html[data-theme="light"] .modal-overlay {
+    background: rgba(15, 23, 42, 0.4) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+html[data-theme="light"] .modal-content {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 24px 64px -12px rgba(0, 0, 0, 0.15) !important;
+    color: #0f172a !important;
+}
+
+html[data-theme="light"] .auth-container {
+    background: 
+        radial-gradient(circle at 50% 25%, rgba(16, 185, 129, 0.08) 0%, transparent 60%),
+        radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+        #f8fafc !important;
+}
+
+html[data-theme="light"] .auth-card {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.08), 0 0 20px rgba(16, 185, 129, 0.06) !important;
+}
+
+html[data-theme="light"] .auth-form input {
+    background: #f8fafc !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    color: #0f172a !important;
+}
+
+html[data-theme="light"] .auth-form input:focus {
+    background: #ffffff !important;
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
+}
+
+html[data-theme="light"] .auth-form h2 {
+    color: #0f172a !important;
+}
+
+/* SHARED BUTTONS & CONTROLS */
+.btn-primary, #add-task-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 2px 12px rgba(16, 185, 129, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.btn-primary:hover, #add-task-btn:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    background: linear-gradient(135deg, #34d399 0%, #059669 100%) !important;
+}
+
+.logo-icon {
+    width: 38px !important;
+    height: 38px !important;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    border-radius: 11px !important;
+    box-shadow: 0 0 18px rgba(16, 185, 129, 0.35) !important;
+}
+
+/* Hide intrusive banners */
+#service-worker-toast, .offline-banner, #bandeau-hors-ligne {
+    display: none !important;
+}
