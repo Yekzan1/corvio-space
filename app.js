@@ -491,8 +491,12 @@ function hideSplash() {
     splash.classList.add('hidden');
     setTimeout(() => splash.remove(), 450);
 }
-// Safety net: never let the splash get stuck if auth hangs.
-setTimeout(hideSplash, 5000);
+// Safety net: prompt auth screen quickly if auth resolution is pending
+setTimeout(() => {
+    if (!state.currentUser) {
+        showAuth();
+    }
+}, 250);
 
 function showAuth() {
     el.authContainer?.classList.remove('hidden');
